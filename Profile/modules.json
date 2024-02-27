@@ -1,0 +1,10 @@
+[
+  {
+    "Name": "InstallModuleFromGitHub",
+    "Source": "https://www.powershellgallery.com/packages/InstallModuleFromGitHub/0.3"
+  },
+  {
+    "Name": "Terminal-Icons",
+    "Source": "https://www.powershellgallery.com/packages/Terminal-Icons/0.11.0"
+  }
+]

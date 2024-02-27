@@ -4,6 +4,8 @@
 
 My PowerShell Profile (WIP)
 
+(The Current Version is just a construct and not meant to be downloaded yet.)
+
 This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) and ([Jan de Dobbeleer](https://github.com/JanDeDobbeleer)).
 
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
