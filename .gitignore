@@ -1,5 +1,17 @@
+# =========================
+# TODO/Test-File
+# =========================
+todo.ps1
+test.ps1
 
+# =========================
+# Personal Module File
+# =========================
+/Profile/modules.json
+
+# =========================
 # Numerous always-ignore extensions
+# =========================
 *.diff
 *.err
 *.orig
@@ -11,7 +23,9 @@
 *.vi
 *~
 
+# =========================
 # Editor folders
+# =========================
 .cache
 .project
 .settings
@@ -22,53 +36,66 @@ nbproject
 *.sublime-workspace
 .idea
 
-# TODO/Test-File
-todo.ps1
-test.ps1
-
 # =========================
 # Operating System Files
 # =========================
 
+# =========================
 # OSX
 # =========================
-
 .DS_Store
 .AppleDouble
 .LSOverride
 
+# =========================
 # Thumbnails
+# =========================
 ._*
 
+# =========================
 # Files that might appear on external disk
+# =========================
 .Spotlight-V100
 .Trashes
 
+# =========================
 # Directories potentially created on remote AFP share
+# =========================
 .AppleDB
 .AppleDesktop
 Network Trash Folder
 Temporary Items
 .apdisk
 
+# =========================
 # Windows
 # =========================
 
+# =========================
 # Windows image file caches
+# =========================
 Thumbs.db
 ehthumbs.db
 
+# =========================
 # Folder config file
+# =========================
 Desktop.ini
 
+# =========================
 # Recycle Bin used on file shares
+# =========================
 $RECYCLE.BIN/
 
+# =========================
 # Windows Installer files
+# =========================
 *.cab
 *.msi
 *.msm
 *.msp
 
+# =========================
 # Windows shortcuts
+# =========================
 *.lnk

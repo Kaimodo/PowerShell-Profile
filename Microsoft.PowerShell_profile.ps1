@@ -9,6 +9,10 @@
 [CmdletBinding(SupportsShouldProcess=$true)]
 Param()
 
+#region SWITCH for Sample-Mode
+$SampleMode = $true
+#endregion
+
 
 #region Dot-Source relevant Functions
 $Path = $PSScriptRoot +"/Profile/func/"
@@ -21,9 +25,8 @@ Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
 
 
 #region Load Modules
-$Basic = (Get-Content ($PSScriptRoot + "./Profile/modulesBasic.json") -Raw) | ConvertFrom-Json 
-$Extended = (Get-Content ($PSScriptRoot + "./Profile/modulesExtended.json") -Raw) | ConvertFrom-Json
-$Timed1 = (Get-Content ($PSScriptRoot + "./Profile/modulesTimed1.json") -Raw) | ConvertFrom-Json
+$Sample = (Get-Content ($PSScriptRoot + "./Profile/modules.json.sample") -Raw) | ConvertFrom-Json 
+$Personal = (Get-Content ($PSScriptRoot + "./Profile/modules.json") -Raw) | ConvertFrom-Json 
 
 $Basic | Select-Object -Property NAME | ForEach-Object {
 	Write-Verbose "Loading ModuleB: $($_.NAME)"

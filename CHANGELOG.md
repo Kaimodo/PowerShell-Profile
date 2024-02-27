@@ -4,4 +4,10 @@
 
 ### Features
 
--
+- Added Setup-File
+
+### Dev
+
+- Added Template.
+- Modified JSON File for Modules
+- Updated ReadMe
