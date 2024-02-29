@@ -1,14 +1,19 @@
 ## content of .\Transscript.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+    Setup Transcription
+#>
 function Transscript {
 <#
 	.SYNOPSIS
-		...
+		Setup Transcription
 	.DESCRIPTION
-		...
-	.PARAMETER <param>
-		...
+		Setup and run Transcription
 	.EXAMPLE
-		PS> ./
+		PS> ./Transscript.ps1
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
@@ -68,6 +73,7 @@ function Transscript {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

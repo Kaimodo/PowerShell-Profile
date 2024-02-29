@@ -1,5 +1,19 @@
 # Changelog for PowerShell-Profile
 
+## v0.3 [2024-02-27]
+
+### Features
+
+- Added Modules-Updater
+
+### Dev
+
+- Worked on Basic Folder/File Structure
+- Added Template Files
+- Added VS-Code Task-Template
+
+---
+
 ## v0.2 [2024-02-27]
 
 ### Features

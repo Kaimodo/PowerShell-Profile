@@ -1,4 +1,11 @@
 ## content of .\TimedPrompt.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+    Ask for input and wait for a certain amount of time.
+#>
 function TimedPrompt {
 <#
 	.SYNOPSIS
@@ -61,6 +68,7 @@ function TimedPrompt {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

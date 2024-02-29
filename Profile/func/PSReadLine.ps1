@@ -1,14 +1,19 @@
 ## content of .\PSReadLine.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+	PSReadLine
+#>
 function PSReadLine {
 <#
 	.SYNOPSIS
-		...
+		Setup PSReadLine
 	.DESCRIPTION
-		...
-	.PARAMETER <param>
-		...
+		Setup PSReadLine
 	.EXAMPLE
-		PS> ./
+		PS> ./PSReadLine.ps1
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
@@ -76,6 +81,7 @@ function PSReadLine {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

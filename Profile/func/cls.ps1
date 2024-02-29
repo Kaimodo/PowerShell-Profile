@@ -1,14 +1,19 @@
 ## content of .\cls.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+    Alien-CLS
+#>
 function cls {
 <#
 	.SYNOPSIS
-		...
+		Fancy cls
 	.DESCRIPTION
-		...
-	.PARAMETER <param>
-		...
+		Well... It's an Alien...
 	.EXAMPLE
-		PS> ./
+		PS> ./cls.ps1
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
@@ -60,6 +65,7 @@ function cls {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

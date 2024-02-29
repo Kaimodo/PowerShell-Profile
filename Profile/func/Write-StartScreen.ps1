@@ -1,14 +1,19 @@
 ## content of .\Write-StartScreen.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+    Shows StartScreen
+#>
 function Write-StartScreen {
 <#
 	.SYNOPSIS
-		...
+		Shows a SpashScreen
 	.DESCRIPTION
-		...
-	.PARAMETER <param>
-		...
+		Shows a SpashScreen on start of PowerShell
 	.EXAMPLE
-		PS> ./
+		PS> ./Write-StartScreen.ps1
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
@@ -78,6 +83,7 @@ function Write-StartScreen {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

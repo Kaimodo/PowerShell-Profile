@@ -1,14 +1,19 @@
 ## content of .\Aliasses.ps1 ##
+<#PSScriptInfo
+.VERSION 0.3
+.AUTHOR Kai Krutscho
+.PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
+.DESCRIPTION
+    Set common Aliasses
+#>
 function Aliasses {
 <#
 	.SYNOPSIS
-		...
+		Set's Common aliasses
 	.DESCRIPTION
-		...
-	.PARAMETER <param>
-		...
+		Set's Common aliasses for easier use
 	.EXAMPLE
-		PS> ./
+		PS> ./Aliasses.ps1
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
@@ -38,6 +43,7 @@ function Aliasses {
 		}
 		catch [Exception] {
             Write-Verbose "$($FunctionName): Process.catch"
+			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}

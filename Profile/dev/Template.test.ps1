@@ -1,15 +1,12 @@
-## content of .\Template.ps1 ##
+## content of .\Template.test.ps1 ##
 <#PSScriptInfo
-.VERSION 0.1
+.VERSION 0.3
 .AUTHOR Kai Krutscho
 .PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
 .DESCRIPTION
-    Default Script Template
+    Test File
 #>
-using namespace System.Management.Automation.Host
-#https://www.sharepointdiary.com/2021/11/progress-bar-in-powershell.html
-
-[CmdletBinding(SupportsShouldProcess=$true)]
+[CmdletBinding()]
 Param()
 
 begin {
@@ -17,22 +14,15 @@ begin {
     Write-Verbose "$($FunctionName): Begin."
     $TempErrAct = $ErrorActionPreference
     $ErrorActionPreference = "Stop"
+	$Module = (Get-Content ($PSScriptRoot + "./Profile/modules.json") -Raw) | ConvertFrom-Json 
 	
 }
 process {
 	try {
 		Write-Verbose "$($FunctionName):Process"
 		#TODO: Start Here:
-			
-		#Snipet
-		$answer = $Host.UI.PromptForChoice('title', 'question', @('&Yes', '&No'), 1)
-		if ($answer -eq 0) {
-			#yes
-			Write-Host 'YES'
-		}else{
-			#no
-			Write-Host 'NO'
-		}
+		
+		
 	}
 	catch [Exception] {
 		Write-Verbose "$($FunctionName): Process.catch"
@@ -40,7 +30,6 @@ process {
 		Write-Output $_.Exception|format-list -force
 	}
 }
-
 end {
         Write-Verbose "$($FunctionName): End."
         $ErrorActionPreference = $TempErrAct

@@ -1,16 +1,19 @@
 ## content of .\_profile.ps1 ##
 <#PSScriptInfo
-.VERSION 0.1
+.VERSION 0.3
 .AUTHOR Kai Krutscho
 .PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
 .DESCRIPTION
 	Profile Script
 #>
+
+using namespace System.Management.Automation.Host
+
 [CmdletBinding(SupportsShouldProcess=$true)]
 Param()
 
 #region SWITCH for Sample-Mode
-$SampleMode = $true
+#$SampleMode = $true
 #endregion
 
 
@@ -24,7 +27,8 @@ Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
 
 
 
-#region Load Modules
+#region Modules
+<#
 $Sample = (Get-Content ($PSScriptRoot + "./Profile/modules.json.sample") -Raw) | ConvertFrom-Json 
 $Personal = (Get-Content ($PSScriptRoot + "./Profile/modules.json") -Raw) | ConvertFrom-Json 
 
@@ -46,6 +50,16 @@ if (TimedPrompt "Load TimedSample?" 3) {
 		Load-Module $name
 	}
 }
+#>
+$answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your Modules?', @('&Yes', '&No'), 1)
+		if ($answer -eq 0) {
+			#yes
+			Write-Host 'YES' -ForegroundColor green
+			Update-Modules
+		}else{
+			#no
+			Write-Host 'NO' -ForegroundColor green
+		}
 #endregion 
 
 
@@ -63,6 +77,7 @@ oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-
 
 #endregion 
 
+#region Chocolatey
 # Import the Chocolatey Profile that contains the necessary code to enable
 # tab-completions to function for `choco`.
 # Be aware that if you are missing these lines from your profile, tab completion
@@ -72,4 +87,6 @@ $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile)) {
   Import-Module "$ChocolateyProfile"
 }
+#endregion
+
 Remove-item alias:cls
