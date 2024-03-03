@@ -1,5 +1,18 @@
 # Changelog for PowerShell-Profile
 
+## v0.4 [2024-03-04]
+
+### Features
+
+- Added init-Script (wip)
+- Changed json for modules
+
+### Dev
+
+- Worked on internal Structures
+
+---
+
 ## v0.3 [2024-02-27]
 
 ### Features

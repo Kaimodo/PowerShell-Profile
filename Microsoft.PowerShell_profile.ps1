@@ -16,7 +16,7 @@ Param()
 #$SampleMode = $true
 #endregion
 
-
+#TODO: ScriptRoot anpassen
 #region Dot-Source relevant Functions
 $Path = $PSScriptRoot +"/Profile/func/"
 Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
@@ -67,11 +67,12 @@ $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your
 Write-Host "PS7 Profile geladen" -ForegroundColor Blue
 #[bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
 
-Basics
+
 Aliasses
 PSReadLine
 Write-StartScreen
 Transscript
+Mini-Functions
 
 oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-Expression
 

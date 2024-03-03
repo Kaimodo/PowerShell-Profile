@@ -37,3 +37,5 @@ irm "https://raw.githubusercontent.com/Kaimodo/PowerShell-Profile/main/setup.ps1
 Now, enjoy your enhanced and stylish PowerShell experience! 🚀
 
 [Back to top](#top)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D1TA89P)

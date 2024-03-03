@@ -9,7 +9,7 @@ test.ps1
 # =========================
 # Personal Module File
 # =========================
-/Profile/modules.json
+/Profile/module.json
 
 # =========================
 # Numerous always-ignore extensions
