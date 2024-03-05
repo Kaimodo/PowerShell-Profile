@@ -1,4 +1,4 @@
-# 🎨 PowerShell-Profile V0.2
+# 🎨 PowerShell-Profile V0.5
 
 <a name="top"></a>
 
@@ -6,7 +6,8 @@
 
 My PowerShell Profile (WIP)
 
-(The Current Version is just a construct and not meant to be downloaded yet.)
+> [!WARNING]
+> The Current Version is just a construct and not meant to be downloaded yet.
 
 This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) and ([Jan de Dobbeleer](https://github.com/JanDeDobbeleer)).
 
@@ -26,7 +27,8 @@ This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) an
 
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
 
-`NOT implemented yet in Version 0.1`
+> [!CAUTION]
+> `NOT implemented yet in Version 0.5`
 
 Execute the following command in an elevated PowerShell window to install the PowerShell profile:
 
