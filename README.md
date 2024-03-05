@@ -2,7 +2,7 @@
 
 <a name="top"></a>
 
-![](./ico/powershell.png)
+![](./media/powershell.png)
 
 My PowerShell Profile (WIP)
 
@@ -28,7 +28,7 @@ This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) an
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
 
 > [!CAUTION]
-> `NOT implemented yet in Version 0.5`
+> NOT implemented yet in Version 0.5
 
 Execute the following command in an elevated PowerShell window to install the PowerShell profile:
 
