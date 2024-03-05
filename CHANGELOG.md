@@ -1,5 +1,21 @@
 # Changelog for PowerShell-Profile
 
+---
+
+## v0.5 [2024-03-05]
+
+### Features
+
+- Worked on Logging
+- Added more Mini Functions
+- Added Environment File
+
+### Dev
+
+- Templates optimized
+
+---
+
 ## v0.4 [2024-03-04]
 
 ### Features

@@ -9,7 +9,7 @@
 
 using namespace System.Management.Automation.Host
 
-[CmdletBinding(SupportsShouldProcess=$true)]
+[CmdletBinding()]
 Param()
 
 #region SWITCH for Sample-Mode
@@ -18,9 +18,12 @@ Param()
 
 #TODO: ScriptRoot anpassen
 #region Dot-Source relevant Functions
+
+Write-Host "Loading Functions..." -ForegroundColor blue
 $Path = $PSScriptRoot +"/Profile/func/"
 Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
-    . $_.FullName
+    Write-Host "Function: $($_.Name)" -ForegroundColor blue
+	. $_.FullName
 }
 #endregion
 
@@ -71,8 +74,10 @@ Write-Host "PS7 Profile geladen" -ForegroundColor Blue
 Aliasses
 PSReadLine
 Write-StartScreen
-Transscript
 Mini-Functions
+Transscript
+
+Init
 
 oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-Expression
 
