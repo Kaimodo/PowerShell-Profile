@@ -10,6 +10,7 @@ test.ps1
 # Personal Module File
 # =========================
 /Profile/module.json
+/Profile/environment.ps1
 
 # =========================
 # Numerous always-ignore extensions
