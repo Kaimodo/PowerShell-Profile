@@ -2,6 +2,14 @@
 
 ---
 
+## v0.6 [2024-03-07]
+
+### Features
+
+- Changed Timed Modules to just extended calls.
+
+---
+
 ## v0.5 [2024-03-05]
 
 ### Features

@@ -13,47 +13,45 @@ using namespace System.Management.Automation.Host
 Param()
 
 #region SWITCH for Sample-Mode
-#$SampleMode = $true
+#TODO: Change $SampleMode to False after you added All your own Modules to the JSON-File
+$SampleMode = $true
+#endregion
+
+#region Helper-Function
+function Get-TimeStamp {
+	Param(
+	[switch]$NoWrap,
+	[switch]$Utc
+	)
+	$dt = Get-Date
+	if ($Utc -eq $true) {
+		$dt = $dt.ToUniversalTime()
+	}
+	$str = "{0:MM/dd/yy} {0:HH:mm:ss}" -f $dt
+
+	if ($NoWrap -ne $true) {
+		$str = "[$str]"
+	}
+	return $str
+}
 #endregion
 
 #TODO: ScriptRoot anpassen
 #region Dot-Source relevant Functions
 
-Write-Host "Loading Functions..." -ForegroundColor blue
+Write-Host "$(Get-TimeStamp)[PROFILE] Loading Functions "-ForegroundColor blue
 $Path = $PSScriptRoot +"/Profile/func/"
 Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
-    Write-Host "Function: $($_.Name)" -ForegroundColor blue
+    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Green
 	. $_.FullName
 }
 #endregion
 
-
-
+#region Transscript
+Transscript
+#endregion
 
 #region Modules
-<#
-$Sample = (Get-Content ($PSScriptRoot + "./Profile/modules.json.sample") -Raw) | ConvertFrom-Json 
-$Personal = (Get-Content ($PSScriptRoot + "./Profile/modules.json") -Raw) | ConvertFrom-Json 
-
-$Basic | Select-Object -Property NAME | ForEach-Object {
-	Write-Verbose "Loading ModuleB: $($_.NAME)"
-	$name = $_.NAME 
-	Load-Module $name
-}
-$Extended | Select-Object -Property NAME | ForEach-Object {
-	Write-Verbose "Loading ModuleE: $($_.NAME)"
-	$name = $_.NAME 
-	Load-Module $name
-}
-if (TimedPrompt "Load TimedSample?" 3) {
-	Write-Host "Loading TimedSample... " -ForegroundColor blue
-	$Timed1 | Select-Object -Property NAME,HTTP | ForEach-Object {
-		Write-Verbose "Loading ModuleT: $($_.NAME)"
-		$name = $_.NAME 
-		Load-Module $name
-	}
-}
-#>
 $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your Modules?', @('&Yes', '&No'), 1)
 		if ($answer -eq 0) {
 			#yes
@@ -63,21 +61,44 @@ $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your
 			#no
 			Write-Host 'NO' -ForegroundColor green
 		}
+
+$ModulePath = $PSScriptRoot + "\Profile\"
+Write-Verbose "$(Get-TimeStamp)[PROFILE]Path to Modules.json: $($ModulePath)"
+$Modules = (Get-Content ($ModulePath + "module.json") -Raw) | ConvertFrom-Json
+			
+if ($SampleMode) {
+	Write-Host "$(Get-TimeStamp)[PROFILE]Samples" -ForegroundColor red
+	foreach ($Mod in $Modules.Samples.Normal.Modules) {
+		$Mod | Select-Object -Property Name | ForEach-Object {
+			Load-Module $_.Name
+		}
+	}
+		
+	$Extended = $Host.UI.PromptForChoice('Extended Modules', 'Install Extended Modules?', @('&Yes', '&No'), 1)
+	if ($Extended -eq 0) {
+		#yes
+		Write-Host 'YES' -ForegroundColor green
+		foreach ($Mod in $Modules.Samples.Extended.Modules) {      
+			$Mod | Select-Object -Property Name | ForEach-Object {
+				Load-Module $_.Name
+			}
+		}
+	}else{
+		#no
+		Write-Host 'NO' -ForegroundColor red
+	}
+}
+
 #endregion 
 
 
 #region start Profile
-Write-Host "PS7 Profile geladen" -ForegroundColor Blue
-#[bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
-
+Write-Host "$(Get-TimeStamp)[PROFILE]PS7 Profile geladen" -ForegroundColor Green
 
 Aliasses
 PSReadLine
 Write-StartScreen
 Mini-Functions
-Transscript
-
-Init
 
 oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-Expression
 
