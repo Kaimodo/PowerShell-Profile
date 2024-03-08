@@ -1,4 +1,4 @@
-# 🎨 PowerShell-Profile V0.5
+# 🎨 PowerShell-Profile V0.7
 
 <a name="top"></a>
 
@@ -6,29 +6,36 @@
 
 My PowerShell Profile (WIP)
 
-> [!WARNING]
-> The Current Version is just a construct and not meant to be downloaded yet.
-
 This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) and ([Jan de Dobbeleer](https://github.com/JanDeDobbeleer)).
 
 > [!IMPORTANT]
-> The Profile Script is rudimentary working. But u need to manual download the Profile-File and the Profile-Folder and put it to the correct place.
+> The Profile Script is rudimentary working. But u need to manual download following Files/Folders:
+
+- Microsoft.PowerShell_profile.ps1
+- Ohmyposhv3-v2.json
+- environment.json.sample
+- module.json.sample
+- "Profile"-Folder
+
+Put all those in your !Profile directory.
+Change or copy the .sample files to .json
+Change the `SampleMode` Variable in `Environment.json`
 
 ---
 
 > [!NOTE]
-> I am currently working on te following tasks:
+> Done things so far:
 >
-> - The Auto-Import/Install of selected Modules
-> - Some critical internal Functions
-> - The overall package
-> - The Documentation
-> - The Setup-Script
+> - [x] The Auto-Import/Install of selected Modules
+> - [x] Some critical internal Functions
+> - [x] The overall package
+> - [x] The Documentation
+> - [ ] The Setup-Script
 
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
 
 > [!CAUTION]
-> NOT implemented yet in Version 0.5
+> NOT implemented yet in Version 0.7
 
 Execute the following command in an elevated PowerShell window to install the PowerShell profile:
 

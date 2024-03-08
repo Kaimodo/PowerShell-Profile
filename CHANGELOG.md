@@ -2,6 +2,16 @@
 
 ---
 
+## v0.7 [2024-03-07]
+
+### Features
+
+- Finalized both json Files
+- Finalized Overall Structure
+- Profile is Running
+
+---
+
 ## v0.6 [2024-03-07]
 
 ### Features

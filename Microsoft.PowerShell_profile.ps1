@@ -1,6 +1,6 @@
 ## content of .\_profile.ps1 ##
 <#PSScriptInfo
-.VERSION 0.3
+.VERSION 0.7
 .AUTHOR Kai Krutscho
 .PROJECTURI https://www.github.com/Kaimodo/PowerShell-Profile
 .DESCRIPTION
@@ -12,10 +12,8 @@ using namespace System.Management.Automation.Host
 [CmdletBinding()]
 Param()
 
-#region SWITCH for Sample-Mode
-#TODO: Change $SampleMode to False after you added All your own Modules to the JSON-File
-$SampleMode = $true
-#endregion
+#region Gloabls
+$global:ProfileRoot =$PSScriptRoot
 
 #region Helper-Function
 function Get-TimeStamp {
@@ -36,13 +34,21 @@ function Get-TimeStamp {
 }
 #endregion
 
-#TODO: ScriptRoot anpassen
-#region Dot-Source relevant Functions
+#region Load Environment.json
+$EnvPath = $ProfileRoot	+"\Profile"
+$Environment = (Get-Content ($EnvPath + "\environment.json") -Raw) | ConvertFrom-Json
+#endregion
 
+#region Check for Updates
+#TODO: Code for Auto Update
+
+#endregion
+
+#region Dot-Source relevant Functions
 Write-Host "$(Get-TimeStamp)[PROFILE] Loading Functions "-ForegroundColor blue
-$Path = $PSScriptRoot +"/Profile/func/"
+$Path = $ProfileRoot +"/Profile/func/"
 Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
-    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Green
+    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
 	. $_.FullName
 }
 #endregion
@@ -59,16 +65,17 @@ $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your
 			Update-Modules
 		}else{
 			#no
-			Write-Host 'NO' -ForegroundColor green
+			Write-Host 'NO' -ForegroundColor red
 		}
 
-$ModulePath = $PSScriptRoot + "\Profile\"
+$ModulePath = $ProfileRoot + "\Profile\"
 Write-Verbose "$(Get-TimeStamp)[PROFILE]Path to Modules.json: $($ModulePath)"
-$Modules = (Get-Content ($ModulePath + "module.json") -Raw) | ConvertFrom-Json
 			
-if ($SampleMode) {
+if ($Environment.Variables.SampleMode -eq $true) {
+	$Modules = (Get-Content ($ModulePath + "module.json.sample") -Raw) | ConvertFrom-Json
 	Write-Host "$(Get-TimeStamp)[PROFILE]Samples" -ForegroundColor red
-	foreach ($Mod in $Modules.Samples.Normal.Modules) {
+	Write-Host "$(Get-TimeStamp)[PROFILE]Change SampleMode to false in '/Profile/environment.json' when you are done with testing" -ForegroundColor red
+	foreach ($Mod in $Modules.MyModules.Normal.Modules) {
 		$Mod | Select-Object -Property Name | ForEach-Object {
 			Load-Module $_.Name
 		}
@@ -78,7 +85,29 @@ if ($SampleMode) {
 	if ($Extended -eq 0) {
 		#yes
 		Write-Host 'YES' -ForegroundColor green
-		foreach ($Mod in $Modules.Samples.Extended.Modules) {      
+		foreach ($Mod in $Modules.MyModules.Extended.Modules) {      
+			$Mod | Select-Object -Property Name | ForEach-Object {
+				Load-Module $_.Name
+			}
+		}
+	}else{
+		#no
+		Write-Host 'NO' -ForegroundColor red
+	}
+} else {
+	$Modules = (Get-Content ($ModulePath + "module.json") -Raw) | ConvertFrom-Json
+	Write-Host "$(Get-TimeStamp)[PROFILE]MyModules" -ForegroundColor Green
+	foreach ($Mod in $Modules.MyModules.Normal.Modules) {
+		$Mod | Select-Object -Property Name | ForEach-Object {
+			Load-Module $_.Name
+		}
+	}
+		
+	$Extended = $Host.UI.PromptForChoice('Extended Modules', 'Install Extended Modules?', @('&Yes', '&No'), 1)
+	if ($Extended -eq 0) {
+		#yes
+		Write-Host 'YES' -ForegroundColor green
+		foreach ($Mod in $Modules.MyModules.Extended.Modules) {      
 			$Mod | Select-Object -Property Name | ForEach-Object {
 				Load-Module $_.Name
 			}
@@ -88,12 +117,11 @@ if ($SampleMode) {
 		Write-Host 'NO' -ForegroundColor red
 	}
 }
-
 #endregion 
 
 
 #region start Profile
-Write-Host "$(Get-TimeStamp)[PROFILE]PS7 Profile geladen" -ForegroundColor Green
+#Write-Host "$(Get-TimeStamp)[PROFILE]PS7 Profile geladen" -ForegroundColor Green
 
 Aliasses
 PSReadLine
@@ -101,7 +129,6 @@ Write-StartScreen
 Mini-Functions
 
 oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-Expression
-
 #endregion 
 
 #region Chocolatey

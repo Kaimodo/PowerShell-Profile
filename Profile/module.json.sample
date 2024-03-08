@@ -1,5 +1,5 @@
 {
-  "Samples": [
+  "MyModules": [
     {
       "Normal": {
         "Modules": [
@@ -13,16 +13,14 @@
           }
         ]
       },
-      "Timed": {
+      "Extended": {
         "Modules": [
           {
-            "Name": "InstallModuleFromGitHub",
-            "Source": "https://www.powershellgallery.com/packages/InstallModuleFromGitHub/0.3",
-            "Time": "3"
+          "Name": "Image2Text",
+          "Source": "https://www.powershellgallery.com/packages/Image2Text/1.0.2"
           }
         ]
       }
     }
-  ],
-  "MyModules": []
+  ]
 }

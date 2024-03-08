@@ -1,0 +1,10 @@
+{
+  "Variables": [
+    {
+      "SampleMode": "true",
+      "Logging": "true",
+      "LogPath": "\\Log",
+      "ErrorActionPreference": "Stop"
+    }
+  ]
+}

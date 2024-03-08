@@ -22,11 +22,76 @@ function Update-Modules {
 		Write-Verbose "$($FunctionName): Begin."
 		$TempErrAct = $ErrorActionPreference
 		$ErrorActionPreference = "Stop"
+
+		#region TimeStamp
+		function Get-TimeStamp {
+			Param(
+			[switch]$NoWrap,
+			[switch]$Utc
+			)
+			$dt = Get-Date
+			if ($Utc -eq $true) {
+				$dt = $dt.ToUniversalTime()
+			}
+			$str = "{0:MM/dd/yy} {0:HH:mm:ss}" -f $dt
+
+			if ($NoWrap -ne $true) {
+				$str = "[$str]"
+			}
+			return $str
+		}
+		#endregion
+
+		#region Environment
+		$FunctionName = $MyInvocation.MyCommand.Name
+		Write-Verbose "$(Get-TimeStamp):$($FunctionName): Begin."
+
+		[string]$logFilePrefix = "Update-Modules_"
+		[string]$logFileDateFormat = "yyyyMMdd_HHmmss"
+		[int]$logFileRetentionDays = 30
 		
+		$EnvPath = $ProfileRoot	+"\Profile"
+		$Environment = (Get-Content ($EnvPath + "\environment.json") -Raw) | ConvertFrom-Json 
+		if($Environment.Variables.Logging -eq $true){	
+			[string]$logFileFolderPath = $EnvPath + $Environment.Variables.LogPath.ToString()
+		} else {
+			$logFileFolderPath = ""
+		}
+		$TempErrAct = $ErrorActionPreference	
+		$ErrorActionPreference = $Environment.Variables.ErrorActionPreference.ToString()
+		Write-Host "$(Get-TimeStamp):$($FunctionName):ErrorActionPreference: $ErrorActionPreference" -ForegroundColor Blue	
+		#endregion
+
+        #region initialization
+		
+		if ($logFileFolderPath -ne "")
+		{
+			if (!(Test-Path -PathType Container -Path $logFileFolderPath)) {
+				Write-Output "$(Get-TimeStamp):$($FunctionName): Creating directory $logFileFolderPath"			
+				New-Item -ItemType Directory -Force -Path $logFileFolderPath | Out-Null
+			} else {
+				$DatetoDelete = $(Get-Date).AddDays(-$logFileRetentionDays)
+				Get-ChildItem $logFileFolderPath | Where-Object { $_.Name -like "*$logFilePrefix*" -and $_.LastWriteTime -lt $DatetoDelete } | Remove-Item | Out-Null
+			}
+			
+			$logFilePath = $logFileFolderPath + "\$logFilePrefix" + "-" + (Get-Date -Format $logFileDateFormat) + ".LOG"
+
+			# attempt to start the transcript log, but don't fail the script if unsuccessful:
+			try 
+			{
+				Start-Transcript -Path $logFilePath -Append
+			}
+			catch [Exception]
+			{
+				Write-Warning "$(Get-TimeStamp):$($FunctionName): Unable to start Transcript: $($_.Exception.Message)"
+				$logFileFolderPath = ""
+			}
+		}
+		#endregion initialization
 	}
 	process {
 		try {
-			Write-Verbose "$($FunctionName):Process"
+			Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process"
 			#TODO: Start Here:
 			Write-Progress -Activity "Checking Modules..." -CurrentOperation "Retrieving modules list..." -PercentComplete 0
 			# Get all the modules that are installed.
@@ -77,7 +142,7 @@ function Update-Modules {
 			}
 		}
 		catch [Exception] {
-			Write-Verbose "$($FunctionName): Process.catch"
+			Write-Verbose "$(Get-TimeStamp):$($FunctionName): Process.catch"
 			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
 			Write-Output $_.Exception|format-list -force
 		}
@@ -86,5 +151,6 @@ function Update-Modules {
 	end {
 			Write-Verbose "$($FunctionName): End."
 			$ErrorActionPreference = $TempErrAct
+			if ($logFileFolderPath -ne "") { Stop-Transcript }
 		}
 }

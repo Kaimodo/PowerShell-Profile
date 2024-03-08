@@ -1,10 +1,8 @@
 # =========================
 # TODO/Test-File
 # =========================
-todo.ps1
-test.ps1
 *.test.ps1
-!Template.test.ps1
+!Template.Full.ps1
 
 # =========================
 # Personal Module File
