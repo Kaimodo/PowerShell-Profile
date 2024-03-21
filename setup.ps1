@@ -135,15 +135,15 @@ process {
 			Write-Host "$(Get-TimeStamp):$($FunctionName):CopyLocation: $($CopyLocation)"
 		
 			#TODO: Check again and than change to: $FileLocation
-			$DestinationPath ="D:\_dev\_workdir\.tmp\out"			
-			Write-Host "$(Get-TimeStamp):$($FunctionName):DestinationPath: $($DestinationPath)"
+			#$DestinationPath ="D:\_dev\_workdir\.tmp\out"			
+			Write-Host "$(Get-TimeStamp):$($FunctionName):DestinationPath: $($FileLocation)"
 		
-			if (!(Test-Path -PathType Container -Path $DestinationPath)) {
-				Write-Host "$(Get-TimeStamp):$($FunctionName):Creating directory $DestinationPath" -ForegroundColor Blue      
-				New-Item -ItemType Directory -Force -Path $DestinationPath | Out-Null
+			if (!(Test-Path -PathType Container -Path $FileLocation)) {
+				Write-Host "$(Get-TimeStamp):$($FunctionName):Creating directory $FileLocation" -ForegroundColor Blue      
+				New-Item -ItemType Directory -Force -Path $FileLocation | Out-Null
 			}
 		
-			Copy-Item -Path $CopyLocation -Destination $DestinationPath -Recurse -Force -Confirm:$false
+			Copy-Item -Path $CopyLocation -Destination $FileLocation -Recurse -Force -Confirm:$false
 		
 		
 		

@@ -36,7 +36,7 @@ Change the `SampleMode` Variable in `Environment.json`
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
 
 > [!CAUTION]
-> Version 0.8:
+> Version 0.8: Setup-Script should run without Problems
 
 Execute the following command in an elevated PowerShell window to install the PowerShell profile:
 
