@@ -1,4 +1,4 @@
-# 🎨 PowerShell-Profile V0.7
+# 🎨 PowerShell-Profile V0.8
 
 <a name="top"></a>
 
@@ -9,7 +9,7 @@ My PowerShell Profile (WIP)
 This is highly inspired by ([Chris Titus](https://github.com/ChrisTitusTech)) and ([Jan de Dobbeleer](https://github.com/JanDeDobbeleer)).
 
 > [!IMPORTANT]
-> The Profile Script is rudimentary working. But u need to manual download following Files/Folders:
+> The Profile Script is working. If Setup.ps1 fails u need to manual download following Files/Folders:
 
 - Microsoft.PowerShell_profile.ps1
 - Ohmyposhv3-v2.json
@@ -30,12 +30,13 @@ Change the `SampleMode` Variable in `Environment.json`
 > - [x] Some critical internal Functions
 > - [x] The overall package
 > - [x] The Documentation
-> - [ ] The Setup-Script
+> - [x] The Setup-Script
+> - [ ] Documentation
 
 ## ⚡ One Line Install (Elevated PowerShell Recommended)
 
 > [!CAUTION]
-> NOT implemented yet in Version 0.7
+> Version 0.8:
 
 Execute the following command in an elevated PowerShell window to install the PowerShell profile:
 
