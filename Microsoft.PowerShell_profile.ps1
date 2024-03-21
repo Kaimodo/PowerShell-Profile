@@ -70,6 +70,9 @@ $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your
 
 $ModulePath = $ProfileRoot + "\Profile\"
 Write-Verbose "$(Get-TimeStamp)[PROFILE]Path to Modules.json: $($ModulePath)"
+
+$PSVersion=$PSVersionTable.PSVersion
+[string]$PSV=$PSVersion.toString()
 			
 if ($Environment.Variables.SampleMode -eq $true) {
 	$Modules = (Get-Content ($ModulePath + "module.json.sample") -Raw) | ConvertFrom-Json
@@ -99,7 +102,11 @@ if ($Environment.Variables.SampleMode -eq $true) {
 	Write-Host "$(Get-TimeStamp)[PROFILE]MyModules" -ForegroundColor Green
 	foreach ($Mod in $Modules.MyModules.Normal.Modules) {
 		$Mod | Select-Object -Property Name | ForEach-Object {
-			Load-Module $_.Name
+			if ($_.Version -lt $PSV) {
+				Load-Module $_.Name
+			} else {
+				Write-Host "$(Get-TimeStamp)[PROFILE]Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
+			}			
 		}
 	}
 		
@@ -109,7 +116,11 @@ if ($Environment.Variables.SampleMode -eq $true) {
 		Write-Host 'YES' -ForegroundColor green
 		foreach ($Mod in $Modules.MyModules.Extended.Modules) {      
 			$Mod | Select-Object -Property Name | ForEach-Object {
-				Load-Module $_.Name
+				if ($_.Version -lt $PSV) {
+					Load-Module $_.Name
+				}
+			} else {
+				Write-Host "$(Get-TimeStamp)[PROFILE]Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
 			}
 		}
 	}else{

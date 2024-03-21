@@ -2,6 +2,16 @@
 
 ---
 
+## v0.8 [2024-03-21]
+
+### Features
+
+- (Hopefully)Finalized Profile.ps1
+- (Hopefully)Finalized Overall Structure
+- (Hopefully)Finalized setup.ps1
+
+---
+
 ## v0.7 [2024-03-07]
 
 ### Features

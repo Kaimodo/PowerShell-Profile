@@ -5,11 +5,13 @@
         "Modules": [
           {
             "Name": "Terminal-Icons",
-            "Source": "https://www.powershellgallery.com/packages/Terminal-Icons/0.11.0"
+            "Source": "https://www.powershellgallery.com/packages/Terminal-Icons/0.11.0",
+            "Version": "5"
           },
           {
             "Name": "PSWindowsUpdate",
-            "Source": "https://www.powershellgallery.com/packages/PSWindowsUpdate/2.2.1.4"
+            "Source": "https://www.powershellgallery.com/packages/PSWindowsUpdate/2.2.1.4",
+            "Version": "5"
           }
         ]
       },
@@ -17,7 +19,8 @@
         "Modules": [
           {
           "Name": "Image2Text",
-          "Source": "https://www.powershellgallery.com/packages/Image2Text/1.0.2"
+          "Source": "https://www.powershellgallery.com/packages/Image2Text/1.0.2",
+          "Version": "5"
           }
         ]
       }
