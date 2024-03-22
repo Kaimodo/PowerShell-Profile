@@ -95,6 +95,7 @@ begin {
 }
 process {
 	try {
+		#region Copy Profile
 		Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process"
 		if ($PSVersionTable.PSEdition -eq "Core" ) {
 			Write-Host "$(Get-TimeStamp):$($FunctionName):This Script is meant to be run on Windows PowerShell Desktop $($PSVersionTable.PSEdition)" -ForegroundColor Red
@@ -162,10 +163,12 @@ process {
 				Write-Host "$(Get-TimeStamp):$($FunctionName):Folder: $($Tmp) has NOT been removed!" -ForegroundColor Red
 			}
 		}
-		
+		#endregion 
 		#TODO: Checkfrom here
 		#& $profile
 
+		#region Additional Utils
+		#TODO: Make WinGet install optional
 		# OMP Install
 		#
 		winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh
@@ -197,9 +200,18 @@ process {
 			Remove-Item -Path ".\CascadiaCode.zip" -Force
 		}
 
+		#TODO: Make Choco install optional
 		# Choco install
 		#
 		Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+		#endregion
+
+		Write-Host "$(Get-TimeStamp):$($FunctionName): You have to make a Copy of:" -ForegroundColor Green
+		Write-Host "$(Get-TimeStamp):$($FunctionName):- environment.json.sample" -ForegroundColor Blue
+		Write-Host "$(Get-TimeStamp):$($FunctionName):- module.json.sample" -ForegroundColor Blue
+		Write-Host "$(Get-TimeStamp):$($FunctionName):And Rename both to .json-Files" 
+		Write-Host "$(Get-TimeStamp):$($FunctionName):After that populute both with your favorite settings/Modules"
+		
 
 
 	}

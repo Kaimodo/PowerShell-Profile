@@ -29,7 +29,6 @@ Change the `SampleMode` Variable in `Environment.json`
 > - [x] The Auto-Import/Install of selected Modules
 > - [x] Some critical internal Functions
 > - [x] The overall package
-> - [x] The Documentation
 > - [x] The Setup-Script
 > - [ ] Documentation
 
@@ -45,6 +44,11 @@ irm "https://raw.githubusercontent.com/Kaimodo/PowerShell-Profile/main/setup.ps1
 ```
 
 Now, enjoy your enhanced and stylish PowerShell experience! 🚀
+
+## Documentation
+
+- [English](./Profile/doc/enUS.md)
+- [German](./Profile/doc/deDE.md)
 
 [Back to top](#top)
 
