@@ -2,6 +2,18 @@
 
 ---
 
+## v0.9 [2024-03-24]
+
+### Features
+
+- Finalized Profile.ps1
+- Finalized Overall Structure
+- Finalized setup.ps1
+- Finalized Documentation
+- Added Auto Documentation [Get-MarkdownHelp](https://github.com/iRon7/Get-MarkdownHelp)
+
+---
+
 ## v0.8 [2024-03-21]
 
 ### Features

@@ -19,7 +19,7 @@ begin {
 	$TempErrAct = $ErrorActionPreference
 	$ErrorActionPreference = "Stop"
 
-	#region TimeStamp
+	#region Helper-Function
 	function Get-TimeStamp {
 		Param(
 		[switch]$NoWrap,
@@ -36,8 +36,6 @@ begin {
 		}
 		return $str
 	}
-	#endregion
-	#region Helper-Function
 	function New-TemporaryDirectory {
         $parent = [System.IO.Path]::GetTempPath()
         [string] $name = [System.Guid]::NewGuid()
@@ -134,9 +132,6 @@ process {
 		
 			$CopyLocation = Join-path $TmpProf "PowerShell-Profile\*"
 			Write-Host "$(Get-TimeStamp):$($FunctionName):CopyLocation: $($CopyLocation)"
-		
-			#TODO: Check again and than change to: $FileLocation
-			#$DestinationPath ="D:\_dev\_workdir\.tmp\out"			
 			Write-Host "$(Get-TimeStamp):$($FunctionName):DestinationPath: $($FileLocation)"
 		
 			if (!(Test-Path -PathType Container -Path $FileLocation)) {
@@ -167,14 +162,10 @@ process {
 		#TODO: Checkfrom here
 		#& $profile
 
-		#region Additional Utils
-		#TODO: Make WinGet install optional
-		# OMP Install
-		#
+		#region OMP Install
 		winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh
-		winget install -e --accept-source-agreements --accept-package-agreements SomePythonThings.WingetUIStore
-
-		# Font Install
+		#endregion
+		#region Font Install
 		# Get all installed font families
 		[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
 		$fontFamilies = (New-Object System.Drawing.Text.InstalledFontCollection).Families
@@ -199,18 +190,30 @@ process {
 			Remove-Item -Path ".\CascadiaCode" -Recurse -Force
 			Remove-Item -Path ".\CascadiaCode.zip" -Force
 		}
-
-		#TODO: Make Choco install optional
-		# Choco install
-		#
-		Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 		#endregion
-
+		#region Choco install
+		$answer = $Host.UI.PromptForChoice('Chocolatey', 'install Chocolatey?', @('&Yes', '&No'), 1)
+			if ($answer -eq 0) {
+				#yes
+				Write-Host "Installing Chocolatey" -ForegroundColor Blue
+				Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+			}
+		#endregion
+		#region WinGetUI
+		$answer = $Host.UI.PromptForChoice('Chocolatey', 'install WinGetUI?', @('&Yes', '&No'), 1)
+			if ($answer -eq 0) {
+				#yes
+				Write-Host "Installing WinGetUI" -ForegroundColor Blue
+				winget install -e --accept-source-agreements --accept-package-agreements SomePythonThings.WingetUIStore
+			}
+		#endregion
+		#region Infos
 		Write-Host "$(Get-TimeStamp):$($FunctionName): You have to make a Copy of:" -ForegroundColor Green
 		Write-Host "$(Get-TimeStamp):$($FunctionName):- environment.json.sample" -ForegroundColor Blue
 		Write-Host "$(Get-TimeStamp):$($FunctionName):- module.json.sample" -ForegroundColor Blue
 		Write-Host "$(Get-TimeStamp):$($FunctionName):And Rename both to .json-Files" 
 		Write-Host "$(Get-TimeStamp):$($FunctionName):After that populute both with your favorite settings/Modules"
+		#endregion
 		
 
 

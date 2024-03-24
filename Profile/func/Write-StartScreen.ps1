@@ -17,7 +17,7 @@ function Write-StartScreen {
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
-		https://www.github.com/Kaimodo/PowerShell-Profile
+		[1]: 	https://www.github.com/Kaimodo/PowerShell-Profile
 	#>
 	[CmdletBinding()]
 	Param()

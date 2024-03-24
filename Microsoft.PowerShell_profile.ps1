@@ -47,9 +47,13 @@ $Environment = (Get-Content ($EnvPath + "\environment.json") -Raw) | ConvertFrom
 #region Dot-Source relevant Functions
 Write-Host "$(Get-TimeStamp)[PROFILE] Loading Functions "-ForegroundColor blue
 $Path = $ProfileRoot +"/Profile/func/"
-Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
+#Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
+#    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
+#	. $_.FullName
+#}
+Get-ChildItem -Path $Path -Filter *.ps1 | ForEach-Object {
     Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
-	. $_.FullName
+    Invoke-Expression (Get-Content $_.FullName -Raw)
 }
 #endregion
 
@@ -58,74 +62,95 @@ Transscript
 #endregion
 
 #region Modules
+$PowerTabConfig = $EnvPath + "\PowerTabConfig.xml"
 $answer = $Host.UI.PromptForChoice('Update Modules', 'Search for Updates to your Modules?', @('&Yes', '&No'), 1)
 		if ($answer -eq 0) {
 			#yes
-			Write-Host 'YES' -ForegroundColor green
+			Write-Host "$(Get-TimeStamp)[PROFILE] Searching for Module-Updates" -ForegroundColor Green
 			Update-Modules
 		}else{
 			#no
-			Write-Host 'NO' -ForegroundColor red
+			Write-Host "$(Get-TimeStamp)[PROFILE] Skipped Module-Update check" -ForegroundColor red
 		}
 
 $ModulePath = $ProfileRoot + "\Profile\"
-Write-Verbose "$(Get-TimeStamp)[PROFILE]Path to Modules.json: $($ModulePath)"
+Write-Verbose "$(Get-TimeStamp)[PROFILE] Path to Modules.json: $($ModulePath)"
 
 $PSVersion=$PSVersionTable.PSVersion
 [string]$PSV=$PSVersion.toString()
 			
 if ($Environment.Variables.SampleMode -eq $true) {
 	$Modules = (Get-Content ($ModulePath + "module.json.sample") -Raw) | ConvertFrom-Json
-	Write-Host "$(Get-TimeStamp)[PROFILE]Samples" -ForegroundColor red
-	Write-Host "$(Get-TimeStamp)[PROFILE]Change SampleMode to false in '/Profile/environment.json' when you are done with testing" -ForegroundColor red
+	Write-Host "$(Get-TimeStamp)[PROFILE] Samples" -ForegroundColor red
+	Write-Host "$(Get-TimeStamp)[PROFILE] Change SampleMode to false in '/Profile/environment.json' when you are done with testing" -ForegroundColor red
 	foreach ($Mod in $Modules.MyModules.Normal.Modules) {
-		$Mod | Select-Object -Property Name | ForEach-Object {
-			Load-Module $_.Name
+		$Mod | Select-Object -Property * | ForEach-Object {
+			if ($_.Version -lt $PSV) {				
+				if ($_.Name -ne "PowerTab") {
+					Load-Module $_.Name
+				} else {
+					Load-Module $_.Name $PowerTabConfig
+				}
+			} else {
+				Write-Host "$(Get-TimeStamp)[PROFILE] Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
+			}
 		}
 	}
 		
 	$Extended = $Host.UI.PromptForChoice('Extended Modules', 'Install Extended Modules?', @('&Yes', '&No'), 1)
 	if ($Extended -eq 0) {
 		#yes
-		Write-Host 'YES' -ForegroundColor green
+		Write-Host "$(Get-TimeStamp)[PROFILE] ExtendedModules" -ForegroundColor Green
 		foreach ($Mod in $Modules.MyModules.Extended.Modules) {      
-			$Mod | Select-Object -Property Name | ForEach-Object {
-				Load-Module $_.Name
+			$Mod | Select-Object -Property * | ForEach-Object {
+				if ($_.Version -lt $PSV) {					
+					if ($_.Name -ne "PowerTab") {
+						Load-Module $_.Name
+					}
+				} else {
+					Write-Host "$(Get-TimeStamp)[PROFILE] Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
+				}
 			}
 		}
 	}else{
 		#no
-		Write-Host 'NO' -ForegroundColor red
+		Write-Host "$(Get-TimeStamp)[PROFILE] Extended Modules not loaded" -ForegroundColor red
 	}
 } else {
 	$Modules = (Get-Content ($ModulePath + "module.json") -Raw) | ConvertFrom-Json
-	Write-Host "$(Get-TimeStamp)[PROFILE]MyModules" -ForegroundColor Green
+	Write-Host "$(Get-TimeStamp)[PROFILE] MyModules" -ForegroundColor Green
 	foreach ($Mod in $Modules.MyModules.Normal.Modules) {
-		$Mod | Select-Object -Property Name | ForEach-Object {
+		$Mod | Select-Object -Property * | ForEach-Object {
 			if ($_.Version -lt $PSV) {
-				Load-Module $_.Name
+				if ($_.Name -ne "PowerTab") {
+					Load-Module $_.Name
+				} else {
+					Load-Module $_.Name $PowerTabConfig
+				}
 			} else {
-				Write-Host "$(Get-TimeStamp)[PROFILE]Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
-			}			
+				Write-Host "$(Get-TimeStamp)[PROFILE] Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
+			}
 		}
 	}
 		
 	$Extended = $Host.UI.PromptForChoice('Extended Modules', 'Install Extended Modules?', @('&Yes', '&No'), 1)
 	if ($Extended -eq 0) {
 		#yes
-		Write-Host 'YES' -ForegroundColor green
+		Write-Host "$(Get-TimeStamp)[PROFILE] ExtendedModules" -ForegroundColor Green
 		foreach ($Mod in $Modules.MyModules.Extended.Modules) {      
-			$Mod | Select-Object -Property Name | ForEach-Object {
+			$Mod | Select-Object -Property * | ForEach-Object {
 				if ($_.Version -lt $PSV) {
-					Load-Module $_.Name
+					if ($_.Name -ne "PowerTab") {
+						Load-Module $_.Name
+					}
+				} else {
+					Write-Host "$(Get-TimeStamp)[PROFILE] Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
 				}
-			} else {
-				Write-Host "$(Get-TimeStamp)[PROFILE]Module: $($_.Name).$($_.Version) is not Supported by your Powershell Version: $($PSV)" -ForegroundColor Red
 			}
 		}
 	}else{
 		#no
-		Write-Host 'NO' -ForegroundColor red
+		Write-Host "$(Get-TimeStamp)[PROFILE] Extended Modules not loaded" -ForegroundColor red
 	}
 }
 #endregion 
@@ -133,10 +158,9 @@ if ($Environment.Variables.SampleMode -eq $true) {
 
 #region start Profile
 #Write-Host "$(Get-TimeStamp)[PROFILE]PS7 Profile geladen" -ForegroundColor Green
-
+Write-Host "$(Get-TimeStamp)[PROFILE] Initializing Profile" -ForegroundColor Blue
 Aliasses
 PSReadLine
-Write-StartScreen
 Mini-Functions
 
 oh-my-posh --init --shell pwsh --config "./Profile/ohmyposhv3-v2.json" | Invoke-Expression
@@ -153,5 +177,5 @@ if (Test-Path($ChocolateyProfile)) {
   Import-Module "$ChocolateyProfile"
 }
 #endregion
-
 Remove-item alias:cls
+Write-StartScreen

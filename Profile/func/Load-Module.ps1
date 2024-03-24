@@ -12,21 +12,27 @@ function Load-Module {
 		Install and Import Module. 
 	.DESCRIPTION
 		Import the specific Module. if Its not Installed, do so and import it.
-	.PARAMETER Module
+	.PARAMETER Name
 		The Name of the Module
+	.PARAMETER ArgumentList
+		Arguments needed for the Import of the Module
 	.EXAMPLE
 		PS> ./Load-Module PSWindowsUpdate
 	.NOTES
 		Author: Kai Krutscho
 	.LINK
-		https://www.github.com/Kaimodo/PowerShell-Profile
+		[1]: 	https://www.github.com/Kaimodo/PowerShell-Profile
 	#>
 	[CmdletBinding()]
 	Param(
 		[Parameter(Position=0, Mandatory=$true)]
 		[ValidateNotNullOrEmpty()]
 		[System.String]
-		$Module
+		$Name,
+		[Parameter(Position=1, Mandatory=$false)]
+		[ValidateNotNullOrEmpty()]
+		[System.String]
+		$ArgumentList
 	)
 
 	begin {
@@ -57,27 +63,26 @@ function Load-Module {
 		try {
 			Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process"
 			# If module is imported say that and do nothing
-			# If module is imported say that and do nothing
-			if (Get-Module | Where-Object {$_.Name -eq $Module}) {
-				write-host "$(Get-TimeStamp)Module $Module is already imported."
+			if (Get-Module | Where-Object {$_.Name -eq $Name}) {
+				write-host "$(Get-TimeStamp):$($FunctionName): Module $Name is already imported."
 			}
 			else {
 		
 				# If module is not imported, but available on disk then import
-				if (Get-Module -ListAvailable | Where-Object {$_.Name -eq $Module}) {
-					Import-Module $Module -PassThru
+				if (Get-Module -ListAvailable | Where-Object {$_.Name -eq $Name}) {
+					Import-Module -Name $Name -ArgumentList $ArgumentList -PassThru
 				}
 				else {
 		
 					# If module is not imported, not available on disk, but is in online gallery then install and import
 					try {
 					
-						if (Find-Module -Name $Module | Where-Object {$_.Name -eq $Module}) {
-							Install-Module -Name $Module -Force -Verbose -Scope CurrentUser
-							Import-Module $Module -PassThru
+						if (Find-Module -Name $Name | Where-Object {$_.Name -eq $Name}) {
+							Install-Module -Name $Name -Force -Verbose -Scope CurrentUser
+							Import-Module -Name $Name -ArgumentList $ArgumentList -PassThru
 						}
 						else {  
-							write-host "$(Get-TimeStamp)Module $Module not imported, not available and not in online gallery, exiting."
+							write-host "$(Get-TimeStamp):$($FunctionName): Module $Name not imported, not available and not in online gallery, exiting."
 							EXIT 1
 						}
 					}

@@ -13,7 +13,22 @@
 	https://sqladm.in/posts/check-if-you-have-old-versions-of-modules/
 #>
 function Update-Modules {
-	
+	<#
+	.SYNOPSIS
+		Update Installed Modules
+	.DESCRIPTION
+		Checks for all currently installed Powershell modules whether they're outdated.
+		Optionally allows you to update the outdated modules as well.
+		Some modules may require Administrator permissions to update.
+	.EXAMPLE
+		PS> ./Update-Module
+	.NOTES
+		Author: Kai Krutscho
+	.LINK
+		[1]: 	https://www.github.com/Kaimodo/PowerShell-Profile
+				original script by Jeff Hill:
+		[2]:	https://sqladm.in/posts/check-if-you-have-old-versions-of-modules/
+	#>
 	[CmdletBinding()]
 	Param()
 

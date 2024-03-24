@@ -11,6 +11,11 @@
 /Profile/environment.json
 
 # =========================
+# Personal Module File
+# =========================
+/Profile/PowerTabConfig.xml
+
+# =========================
 # Numerous always-ignore extensions
 # =========================
 *.diff
