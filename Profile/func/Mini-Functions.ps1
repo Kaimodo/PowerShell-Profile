@@ -28,12 +28,30 @@ function Mini-Functions {
             Write-Verbose "$($FunctionName): Begin."
             $TempErrAct = $ErrorActionPreference
             $ErrorActionPreference = "Stop"
+            #region Helper-Function
+            function Get-TimeStamp {
+                Param(
+                [switch]$NoWrap,
+                [switch]$Utc
+                )
+                $dt = Get-Date
+                if ($Utc -eq $true) {
+                    $dt = $dt.ToUniversalTime()
+                }
+                $str = "{0:MM/dd/yy} {0:HH:mm:ss}" -f $dt
+
+                if ($NoWrap -ne $true) {
+                    $str = "[$str]"
+                }
+                return $str
+            }
+		#endregion	
             
     
         }
         process {
             try {
-                Write-Verbose "$($FunctionName):Process"
+                Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process"
                 # Useful shortcuts for traversing directories
                 #TODO: Functions not working as intended
                 # https://www.donnfelker.com/loading-powershell-profiles-from-other-script-files/
@@ -105,17 +123,62 @@ function Mini-Functions {
                       }
                      }
                     }
-    
+                
+                    function global:CreateAndSet-Directory([String] $path) { New-Item $path -ItemType Directory -ErrorAction SilentlyContinue; Set-Location $path}
+                    
+                    function global:Get-DiskUsage([string] $path=(Get-Location).Path) {
+                        Convert-ToDiskSize `
+                            ( `
+                                Get-ChildItem .\ -recurse -ErrorAction SilentlyContinue `
+                                | Measure-Object -property length -sum -ErrorAction SilentlyContinue
+                            ).Sum `
+                            1
+                    }
+
+                    function global:Empty-RecycleBin {
+                        $RecBin = (New-Object -ComObject Shell.Application).Namespace(0xA)
+                        $RecBin.Items() | %{Remove-Item $_.Path -Recurse -Confirm:$false}
+                    }
+
+                    function global:curlex($url) {
+                        $uri = new-object system.uri $url
+                        $filename = $name = $uri.segments | Select-Object -Last 1
+                        $path = join-path $env:Temp $filename
+                        if( test-path $path ) { rm -force $path }
+                    
+                        (new-object net.webclient).DownloadFile($url, $path)
+                    
+                        return new-object io.fileinfo $path
+                    }
+
+                    function global:Reload-Powershell {
+                        $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
+                        $newProcess.Arguments = "-nologo";
+                        [System.Diagnostics.Process]::Start($newProcess);
+                        exit
+                    }
+
+                    function global:System-Update() {
+                        Install-WindowsUpdate -IgnoreUserInput -IgnoreReboot -AcceptAll
+                        Update-Module
+                        Update-Help -Force
+                        #gem update --system
+                        #gem update
+                        #npm install npm -g
+                        #npm update -g
+                    }
+
+                    function global:Edit-Profile { Invoke-Expression "$(if($env:EDITOR -ne $null)  {$env:EDITOR } else { 'notepad' }) $profile" }
     
             }
             catch [Exception] {
-                Write-Verbose "$($FunctionName): Process.catch"
-                Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
+                Write-Verbose "$(Get-TimeStamp):$($FunctionName): Process.catch"
+                Write-Host "$(Get-TimeStamp):$($FunctionName): Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
                 Write-Output $_.Exception|format-list -force
             }
         }
         end {
-                Write-Verbose "$($FunctionName): End."
+                Write-Verbose "$(Get-TimeStamp):$($FunctionName): End."
                 $ErrorActionPreference = $TempErrAct
         }
     }

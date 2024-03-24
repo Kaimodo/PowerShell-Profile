@@ -27,12 +27,30 @@ function Transscript {
 		Write-Verbose "$($FunctionName): Begin."
 		$TempErrAct = $ErrorActionPreference
 		$ErrorActionPreference = "Stop"
+		#region Helper-Function
+		function Get-TimeStamp {
+			Param(
+			[switch]$NoWrap,
+			[switch]$Utc
+			)
+			$dt = Get-Date
+			if ($Utc -eq $true) {
+				$dt = $dt.ToUniversalTime()
+			}
+			$str = "{0:MM/dd/yy} {0:HH:mm:ss}" -f $dt
+
+			if ($NoWrap -ne $true) {
+				$str = "[$str]"
+			}
+			return $str
+		}
+		#endregion
 		
 
 	}
 	process {
 		try {
-			Write-Verbose "$($FunctionName):Process"
+			Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process"
 			if(!(Test-Path variable:doc)){
 				New-Variable    -Name doc -Value "$home\documents" `
 								-Description "My documents library. Profile created" `
@@ -53,7 +71,7 @@ function Transscript {
 			}
 
 			Function Test-ConsoleHost {
-				Write-Verbose "$($FunctionName):Process: Test-ConsoleHost"
+				Write-Verbose "$(Get-TimeStamp):$($FunctionName):Process: Test-ConsoleHost"
 				if(($host.Name -match 'consolehost')) {$true}
 				Else {$false}  
 			}
@@ -72,13 +90,13 @@ function Transscript {
 
 		}
 		catch [Exception] {
-            Write-Verbose "$($FunctionName): Process.catch"
-			Write-Host "Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
+            Write-Verbose "$(Get-TimeStamp):$($FunctionName): Process.catch"
+			Write-Host "$(Get-TimeStamp):$($FunctionName): Error on line $($_.InvocationInfo.ScriptLineNumber): $($_.Exception.Message)"
             Write-Output $_.Exception|format-list -force
         }
 	}
 	end {
-			Write-Verbose "$($FunctionName): End."
+			Write-Verbose "$(Get-TimeStamp):$($FunctionName): End."
 			$ErrorActionPreference = $TempErrAct
 	}
 }

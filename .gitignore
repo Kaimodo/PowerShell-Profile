@@ -16,6 +16,11 @@
 /Profile/PowerTabConfig.xml
 
 # =========================
+# Lock-File
+# =========================
+Profile.lock
+
+# =========================
 # Numerous always-ignore extensions
 # =========================
 *.diff

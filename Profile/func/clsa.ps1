@@ -6,7 +6,7 @@
 .DESCRIPTION
     Alien-CLS
 #>
-function cls {
+function global:clsa {
 <#
 	.SYNOPSIS
 		Fancy cls
@@ -30,7 +30,7 @@ function cls {
 	}
 	process {
 		try {
-			Write-Verbose "$($FunctionName):Process"
+			Write-Verbose "$($FunctionName):Process"			
 			Clear-Host
 			Write-Host $block -ForegroundColor Green
 			$block = @"

@@ -14,6 +14,7 @@ Param()
 
 #region Gloabls
 $global:ProfileRoot =$PSScriptRoot
+#endregion
 
 #region Helper-Function
 function Get-TimeStamp {
@@ -33,6 +34,17 @@ function Get-TimeStamp {
 	return $str
 }
 #endregion
+#region Lock-File
+$LockFile = Join-Path $PSScriptRoot "Profile.lock"
+# Check if the lock file exists
+if (Test-Path $LockFile) {
+    Write-Host "$(Get-TimeStamp)[PROFILE] Another instance is already running, aborting" -ForegroundColor Red
+    exit 0
+}
+
+# Create the lock file
+New-Item -ItemType File -Path $LockFile | Out-Null
+#endregion
 
 #region Load Environment.json
 $EnvPath = $ProfileRoot	+"\Profile"
@@ -47,14 +59,15 @@ $Environment = (Get-Content ($EnvPath + "\environment.json") -Raw) | ConvertFrom
 #region Dot-Source relevant Functions
 Write-Host "$(Get-TimeStamp)[PROFILE] Loading Functions "-ForegroundColor blue
 $Path = $ProfileRoot +"/Profile/func/"
-#Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
-#    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
-#	. $_.FullName
-#}
-Get-ChildItem -Path $Path -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object {
     Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
-    Invoke-Expression (Get-Content $_.FullName -Raw)
+	. $_.FullName
 }
+#Get-ChildItem -Path $Path -Filter *.ps1 | ForEach-Object {
+#    Write-Host "$(Get-TimeStamp)[PROFILE] Function: $($_.Name)" -ForegroundColor Blue
+#    Invoke-Expression (Get-Content $_.FullName -Raw)
+#}
+#Get-ChildItem -Path $Path -Filter *.ps1 |ForEach-Object -process {Invoke-Expression ". $_"}
 #endregion
 
 #region Transscript
@@ -159,7 +172,6 @@ if ($Environment.Variables.SampleMode -eq $true) {
 #region start Profile
 #Write-Host "$(Get-TimeStamp)[PROFILE]PS7 Profile geladen" -ForegroundColor Green
 Write-Host "$(Get-TimeStamp)[PROFILE] Initializing Profile" -ForegroundColor Blue
-Aliasses
 PSReadLine
 Mini-Functions
 
@@ -177,5 +189,7 @@ if (Test-Path($ChocolateyProfile)) {
   Import-Module "$ChocolateyProfile"
 }
 #endregion
-Remove-item alias:cls
 Write-StartScreen
+#region Remove the lock file when the script finishes
+Remove-Item $LockFile -Force
+#endregion

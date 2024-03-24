@@ -1,4 +1,4 @@
-# 🎨 PowerShell-Profile V0.8
+# 🎨 PowerShell-Profile V1.0
 
 <a name="top"></a>
 

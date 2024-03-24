@@ -2,6 +2,20 @@
 
 ---
 
+## v1.0 [2024-03-25]
+
+### Features
+
+- Added some Mini-Functions
+
+### Fix
+
+- changed cls to clsa
+- fixed Get-MarkdownHelp
+- fixed Aliasses
+
+---
+
 ## v0.9 [2024-03-24]
 
 ### Features

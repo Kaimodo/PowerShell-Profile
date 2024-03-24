@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 -->
 
-# cls
+# clsa
 
 Fancy cls
 
@@ -12,7 +12,7 @@ Well... It's an Alien...
 
 ### Beispiel 1:
 
-./cls.ps1
+./clsa.ps1
 
 ## Verwandte Links
 

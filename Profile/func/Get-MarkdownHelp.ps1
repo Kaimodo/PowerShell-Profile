@@ -126,417 +126,418 @@
  
     https://www.markdownguide.org/basic-syntax/ "Markdown guide"
 #>
-
 using NameSpace System.Management.Automation
 using NameSpace System.Management.Automation.Language
+function Get-MarkdownHelp {
 
-[CmdletBinding()][OutputType([String[]])] param(
-    [Parameter(ValueFromPipeLine = $True, ValueFromPipelineByPropertyName = $True)]
-    $Source,
+    [CmdletBinding()][OutputType([String[]])] param(
+        [Parameter(ValueFromPipeLine = $True, ValueFromPipelineByPropertyName = $True)]
+        $Source,
 
-    [Parameter(ValueFromPipelineByPropertyName = $True)]
-    $Command,
+        [Parameter(ValueFromPipelineByPropertyName = $True)]
+        $Command,
 
-    [String]$PSCodePattern = 'PS.*\>',
+        [String]$PSCodePattern = 'PS.*\>',
 
-    [String]$AlternateEOL = '\'
-)
+        [String]$AlternateEOL = '\'
+    )
 
-begin {
-    enum MDBlock {
-        None
-        Text
-        Code
-        Fenced
-    }
-    $TabSize = 4
-    $Tab = ' ' * $TabSize
-    $CodePrefix = "(?<=^\s*)$PSCodePattern"
+    begin {
+        enum MDBlock {
+            None
+            Text
+            Code
+            Fenced
+        }
+        $TabSize = 4
+        $Tab = ' ' * $TabSize
+        $CodePrefix = "(?<=^\s*)$PSCodePattern"
 
-    $UriLabelPattern  = '\[(?<Label>.+)\]\:'
-    $UriPattern       = '\<?(?<Uri>\w+://\S+)\>?'
-    $UriTitlePattern  = '("(?<Title>.*)"|''(?<Title>.*)''|\((?<Title>.?)\))'
-    $ReferencePattern = "^($UriLabelPattern\s+)?$UriPattern(\s+$UriTitlePattern)?$"
-    $AlternateEOL     = [regex]::Escape($AlternateEOL) + '\s*$'
+        $UriLabelPattern  = '\[(?<Label>.+)\]\:'
+        $UriPattern       = '\<?(?<Uri>\w+://\S+)\>?'
+        $UriTitlePattern  = '("(?<Title>.*)"|''(?<Title>.*)''|\((?<Title>.?)\))'
+        $ReferencePattern = "^($UriLabelPattern\s+)?$UriPattern(\s+$UriTitlePattern)?$"
+        $AlternateEOL     = [regex]::Escape($AlternateEOL) + '\s*$'
 
-    Class Sentence {
-        [Int]$Offset
-        [string]$Text
-        static [Int]$TabSize = $TabSize
-        Sentence([String]$String) {
-            $This.Text = $String.Trim()
-            if ($This.Text) {
-                for ($i = 0; $i -lt $String.Length; $i++) {
-                    switch ($String[$i]) {
-                        ' '     { $This.Offset++ }
-                        "`t"    { $This.Offset = $This.Offset - $This.Offset % [Sentence]::TabSize + [Sentence]::TabSize }
-                        Default { $i = $String.Length }
+        Class Sentence {
+            [Int]$Offset
+            [string]$Text
+            static [Int]$TabSize = $TabSize
+            Sentence([String]$String) {
+                $This.Text = $String.Trim()
+                if ($This.Text) {
+                    for ($i = 0; $i -lt $String.Length; $i++) {
+                        switch ($String[$i]) {
+                            ' '     { $This.Offset++ }
+                            "`t"    { $This.Offset = $This.Offset - $This.Offset % [Sentence]::TabSize + [Sentence]::TabSize }
+                            Default { $i = $String.Length }
+                        }
                     }
                 }
             }
-        }
-        [string]Indent([Int]$Offset) {
-            $Spaces = [Math]::Max(0, ($This.Offset + $Offset))
-            return ' ' * $Spaces + $This.Text
-        }
-    }
-
-    function StopError($Exception, $Id = 'IncorrectArgument', $Group = [Management.Automation.ErrorCategory]::SyntaxError, $Object){
-        if ($Exception -isnot [Exception]) { $Exception = [ArgumentException]$Exception }
-        $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($Exception, $Id, $Group, $Object))
-    }
-
-    function GetHelpItems([String[]]$Lines) {
-        $Key, $Item = $Null
-        $Help = @{}
-        foreach ($Line in $Lines) {
-            $Sentence = [Sentence]($Line -Replace $CodePrefix, $Tab)
-            switch ($Sentence.Text) {
-                { $_.StartsWith('<#') } {}
-                { $_.EndsWith('#>')   } {}
-                { '.Synopsis', '.Description', '.Inputs', '.Outputs', '.Notes', '.Link' -eq $_ } {
-                    $Key = $_.SubString(1)
-                    $Item = $Help[$Key] = [Collections.Generic.List[Sentence]]::new()
-                }
-                '.Example' {
-                    if (!$Help.Contains('Example')) { $Help['Example'] = [Collections.Generic.List[object]]::new() }
-                    $Help['Example'].Add([Collections.Generic.List[Sentence]]::new())
-                    $Item = $Help['Example'][-1]
-                }
-                { $_ -Like '.Parameter *' } {
-                    if (!$Help.Contains('Parameter')) { $Help['Parameter'] = @{} }
-                    $Name = ($_ -Split '\.Parameter\s+', 2)[1]
-                    $Item = $Help['Parameter'][$Name] = [Collections.Generic.List[Sentence]]::new()
-                }
-                Default {
-                    if ($Null -ne $Item) { if ($Item.Count -Or $Sentence.Text) { $Item.add($Sentence) } }
-                    elseif (!$_) { break }
-                }
+            [string]Indent([Int]$Offset) {
+                $Spaces = [Math]::Max(0, ($This.Offset + $Offset))
+                return ' ' * $Spaces + $This.Text
             }
         }
-        $Help
-    }
 
-    function GetHelp([String]$Content) {
-        $Help = $Null
-        $Lines = [Collections.Generic.List[String]]::new()
-        foreach ($Token in [PSParser]::Tokenize($Content, [Ref]$Null)) {
-            if ($Token.Type -eq 'Comment') {
-                if ($Token.Content.StartsWith('#') ) {
-                    $Lines.Add($Token.Content.SubString(1))
+        function StopError($Exception, $Id = 'IncorrectArgument', $Group = [Management.Automation.ErrorCategory]::SyntaxError, $Object){
+            if ($Exception -isnot [Exception]) { $Exception = [ArgumentException]$Exception }
+            $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($Exception, $Id, $Group, $Object))
+        }
+
+        function GetHelpItems([String[]]$Lines) {
+            $Key, $Item = $Null
+            $Help = @{}
+            foreach ($Line in $Lines) {
+                $Sentence = [Sentence]($Line -Replace $CodePrefix, $Tab)
+                switch ($Sentence.Text) {
+                    { $_.StartsWith('<#') } {}
+                    { $_.EndsWith('#>')   } {}
+                    { '.Synopsis', '.Description', '.Inputs', '.Outputs', '.Notes', '.Link' -eq $_ } {
+                        $Key = $_.SubString(1)
+                        $Item = $Help[$Key] = [Collections.Generic.List[Sentence]]::new()
+                    }
+                    '.Example' {
+                        if (!$Help.Contains('Example')) { $Help['Example'] = [Collections.Generic.List[object]]::new() }
+                        $Help['Example'].Add([Collections.Generic.List[Sentence]]::new())
+                        $Item = $Help['Example'][-1]
+                    }
+                    { $_ -Like '.Parameter *' } {
+                        if (!$Help.Contains('Parameter')) { $Help['Parameter'] = @{} }
+                        $Name = ($_ -Split '\.Parameter\s+', 2)[1]
+                        $Item = $Help['Parameter'][$Name] = [Collections.Generic.List[Sentence]]::new()
+                    }
+                    Default {
+                        if ($Null -ne $Item) { if ($Item.Count -Or $Sentence.Text) { $Item.add($Sentence) } }
+                        elseif (!$_) { break }
+                    }
                 }
-                else { #Block Comment
-                    $Help = GetHelpItems ($Token.Content -split '\r?\n')
+            }
+            $Help
+        }
+
+        function GetHelp([String]$Content) {
+            $Help = $Null
+            $Lines = [Collections.Generic.List[String]]::new()
+            foreach ($Token in [PSParser]::Tokenize($Content, [Ref]$Null)) {
+                if ($Token.Type -eq 'Comment') {
+                    if ($Token.Content.StartsWith('#') ) {
+                        $Lines.Add($Token.Content.SubString(1))
+                    }
+                    else { #Block Comment
+                        $Help = GetHelpItems ($Token.Content -split '\r?\n')
+                        $Lines.Clear()
+                    }
+
+                }
+                elseif ($Token.Type -ne 'NewLine') {
+                    $Help = GetHelpItems $Lines
                     $Lines.Clear()
                 }
-
+                if ($Help -and $Help.Count -and $Help.Contains('Synopsis')) { return $Help }
             }
-            elseif ($Token.Type -ne 'NewLine') {
-                $Help = GetHelpItems $Lines
-                $Lines.Clear()
-            }
-            if ($Help -and $Help.Count -and $Help.Contains('Synopsis')) { return $Help }
-        }
-        if ($Lines.Count -and !$Help) { GetHelpItems $Lines } # Only line commented help
-    }
-
-    function SplitInLineCode ([String]$Markdown) {
-        $Left = ''
-        While ($Markdown -Match '^([^`]*)(`+)([\s\S]*)$') {
-            $Code, $Right = $Matches[3] -Split "(?<!``)$($Matches[2])(?!``)", 2
-            if ($Null -ne $Right) {
-                $Left + $Matches[1]
-                $Matches[2] + $Code + $Matches[2]
-                $Markdown = $Right
-                $Left = ''
-            }
-            else {
-                $Left += $Matches[1] + $Matches[2]
-                $Markdown = $Matches[3]
-            }
-        }
-        $Left + $MarkDown
-    }
-
-    function QuickLinks($Markdown) {
-        $CallBack = {
-            $Label = $Args[0].Value.TrimStart('[').TrimEnd(']')
-            if ( $Label -Match '^(-\w+)(\s+parameter)?$' -and $ParamNames -eq $Matches[1].TrimStart('-') ) {
-                "[``$($Matches[1])``$($Matches[2])](#$($Matches[1].ToLower()))"
-            }
-            else {
-                $Command = Get-Command $Label -ErrorAction SilentlyContinue
-                if ($Command.HelpUri) { "[``$Label``]($($Command.HelpUri))" }
-                else { "[$Label](#$($Label.ToLower() -Replace '\W+', '-'))" }
-            }
-        }
-        $Index = 0
-        -Join @(
-            foreach ($String in @(SplitInLineCode $Markdown)) {
-                if ($Index++ -band 1) { $String } # Inline code
-                else { ([regex]'(?<!\])\[[\w\- ]+\](?![\[\(])').Replace($String, $CallBack) }
-            }
-        )
-    }
-
-    function GetMarkDown([Sentence[]]$Sentences) {
-        $CodeOffset = $TextOffset = 99
-        foreach ($Sentence in $Sentences) { # determine general offset
-            if ($Sentence.Text -and $Sentence.Offset -lt $TextOffset) { $TextOffset = $Sentence.Offset }
-        }
-        if ($Null -eq $Script:Indent) { $Script:Indent = $TextOffset }
-        elseif ($TextOffset -gt $Script:Indent) { $TextOffset = $Script:Indent }
-
-        foreach ($Sentence in $Sentences) { # determine code offset
-            if ($Sentence.Text -and $Sentence.Offset -ge $TextOffset + $TabSize) {
-                if ($Sentence.Offset -lt $CodeOffset) { $CodeOffset = $Sentence.Offset }
-            }
+            if ($Lines.Count -and !$Help) { GetHelpItems $Lines } # Only line commented help
         }
 
-        $SkipLines = 0
-        [MDBlock]$MDBlock = 'None'
-
-        foreach ($Sentence in $Sentences) {
-            if ($MDBlock -eq 'Fenced') {
-                $Sentence.Indent(-$TextOffset)
-                if ($Sentence.Text -Match $Fence ) {
-                    $SkipLines = 1
-                    $MDBlock = 'None'
+        function SplitInLineCode ([String]$Markdown) {
+            $Left = ''
+            While ($Markdown -Match '^([^`]*)(`+)([\s\S]*)$') {
+                $Code, $Right = $Matches[3] -Split "(?<!``)$($Matches[2])(?!``)", 2
+                if ($Null -ne $Right) {
+                    $Left + $Matches[1]
+                    $Matches[2] + $Code + $Matches[2]
+                    $Markdown = $Right
+                    $Left = ''
+                }
+                else {
+                    $Left += $Matches[1] + $Matches[2]
+                    $Markdown = $Matches[3]
                 }
             }
-            elseif ($Sentence.Text -Match '^`{3,4}') { # Either: ``` or: ````
-                if ($SkipLines) { '' }
-                $Sentence.Indent(-$TextOffset)
-                $SkipLines = 0
-                $MDBlock = 'Fenced'
-                $Fence = $Matches[0]
+            $Left + $MarkDown
+        }
+
+        function QuickLinks($Markdown) {
+            $CallBack = {
+                $Label = $Args[0].Value.TrimStart('[').TrimEnd(']')
+                if ( $Label -Match '^(-\w+)(\s+parameter)?$' -and $ParamNames -eq $Matches[1].TrimStart('-') ) {
+                    "[``$($Matches[1])``$($Matches[2])](#$($Matches[1].ToLower()))"
+                }
+                else {
+                    $Command = Get-Command $Label -ErrorAction SilentlyContinue
+                    if ($Command.HelpUri) { "[``$Label``]($($Command.HelpUri))" }
+                    else { "[$Label](#$($Label.ToLower() -Replace '\W+', '-'))" }
+                }
             }
-            elseif (!$Sentence.Text) { $SkipLines++ }
-            elseif ($Sentence.Offset -lt $TextOffset + $TabSize) { # Text block
-                if ($MDBlock -eq 'Text') {
+            $Index = 0
+            -Join @(
+                foreach ($String in @(SplitInLineCode $Markdown)) {
+                    if ($Index++ -band 1) { $String } # Inline code
+                    else { ([regex]'(?<!\])\[[\w\- ]+\](?![\[\(])').Replace($String, $CallBack) }
+                }
+            )
+        }
+
+        function GetMarkDown([Sentence[]]$Sentences) {
+            $CodeOffset = $TextOffset = 99
+            foreach ($Sentence in $Sentences) { # determine general offset
+                if ($Sentence.Text -and $Sentence.Offset -lt $TextOffset) { $TextOffset = $Sentence.Offset }
+            }
+            if ($Null -eq $Script:Indent) { $Script:Indent = $TextOffset }
+            elseif ($TextOffset -gt $Script:Indent) { $TextOffset = $Script:Indent }
+
+            foreach ($Sentence in $Sentences) { # determine code offset
+                if ($Sentence.Text -and $Sentence.Offset -ge $TextOffset + $TabSize) {
+                    if ($Sentence.Offset -lt $CodeOffset) { $CodeOffset = $Sentence.Offset }
+                }
+            }
+
+            $SkipLines = 0
+            [MDBlock]$MDBlock = 'None'
+
+            foreach ($Sentence in $Sentences) {
+                if ($MDBlock -eq 'Fenced') {
+                    $Sentence.Indent(-$TextOffset)
+                    if ($Sentence.Text -Match $Fence ) {
+                        $SkipLines = 1
+                        $MDBlock = 'None'
+                    }
+                }
+                elseif ($Sentence.Text -Match '^`{3,4}') { # Either: ``` or: ````
                     if ($SkipLines) { '' }
+                    $Sentence.Indent(-$TextOffset)
+                    $SkipLines = 0
+                    $MDBlock = 'Fenced'
+                    $Fence = $Matches[0]
                 }
-                elseif ($MDBlock -eq 'Code') {
-                    '```'
-                    ''
+                elseif (!$Sentence.Text) { $SkipLines++ }
+                elseif ($Sentence.Offset -lt $TextOffset + $TabSize) { # Text block
+                    if ($MDBlock -eq 'Text') {
+                        if ($SkipLines) { '' }
+                    }
+                    elseif ($MDBlock -eq 'Code') {
+                        '```'
+                        ''
+                    }
+                    QuickLinks ($Sentence.Text -Replace $AlternateEOL, ' ')
+                    $SkipLines = 0
+                    $MDBlock = 'Text'
                 }
-                QuickLinks ($Sentence.Text -Replace $AlternateEOL, ' ')
-                $SkipLines = 0
-                $MDBlock = 'Text'
+                else { # if ($Sentence.Offset -ge $TextOffset + $TabSize) { # Code block
+                    if ($MDBlock -eq 'Code') {
+                        if ($SkipLines) { @('') * $SkipLines }
+                    }
+                    elseif ($MDBlock -eq 'Text') {
+                        ''
+                        '```PowerShell'
+                    }
+                    $Sentence.Indent(-$TextOffset - $TabSize)
+                    $SkipLines = 0
+                    $MDBlock = 'Code'
+                }
             }
-            else { # if ($Sentence.Offset -ge $TextOffset + $TabSize) { # Code block
-                if ($MDBlock -eq 'Code') {
-                    if ($SkipLines) { @('') * $SkipLines }
-                }
-                elseif ($MDBlock -eq 'Text') {
-                    ''
-                    '```PowerShell'
-                }
-                $Sentence.Indent(-$TextOffset - $TabSize)
-                $SkipLines = 0
-                $MDBlock = 'Code'
-            }
+            if ('Code', 'Fenced' -eq $MDBlock) { '```' }
         }
-        if ('Code', 'Fenced' -eq $MDBlock) { '```' }
-    }
 
-    function GetTypeLink($TypeName) {
-        $Type = $TypeName -as [Type]
-        if ($Type) {
-            $TypeName = $Type.Name
-            $TypeUri = 'https://docs.microsoft.com/en-us/dotnet/api/' + $Type.FullName
-            "<a href=""$TypeUri"">$TypeName</a>"
-        }
-        else {
-            $TypeName
-        }
-    }
-}
-
-process {
-    $File = try { Get-Item $Source } catch { $Null }
-    if (-not $File) { StopError "Cannot find file '$Source'" }
-    $Ast = [Parser]::ParseFile($File.FullName, [ref]$Null, [ref]$Null)
-    $Body =
-        if ($Command) { $Ast.EndBlock.Statements.where{$_.Name -eq $Command}.Body }
-        elseif ($Ast.ParamBlock) { $Ast }
-        else {
-            $Function = $Ast.EndBlock.Statements.where{ $_ -is [FunctionDefinitionAst] }
-            if ($Function.Count -eq 1) { $Function.Body }
-            else { $Ast.EndBlock.Statements.where{ $_.name -is $File.BaseName }.Body }
-        }
-    if (-not $Body) { StopError "Cannot find parameters in '$Source'" }
-    $Help = GetHelp $Body
-    if (-not $Help -and $Body.Parent) { $Help = GetHelp $Ast }
-    if (-not $Help) { StopError "Cannot find comment base help in '$Source'" }
-
-    $Parameters = $Body.ParamBlock.Parameters
-    $ParameterSets = [Ordered]@{}
-    $Parameters.foreach{
-        $Name =  $_.Name.VariablePath.UserPath
-        $Sets = $_.Attributes.NamedArguments.where{ $_.ArgumentName -eq 'ParameterSetName' }
-        foreach ($Value in @($Sets.Argument.Value)) {
-            $SetName = if ($Value) { "$Value" } else { '__AllParameterSets' }
-             if (!$ParameterSets.Contains($SetName)) { $ParameterSets[$SetName] = [Ordered]@{} }
-            $ParameterSets[$SetName][$Name] = $_
-        }
-    }
-    foreach ($SetName in $ParameterSets.get_Keys()) {
-        $ParameterSets[$SetName]['<CommonParameters>'] = $Null
-        if ($Ast.DynamicParamBlock) { $ParameterSets[$SetName]['<DynamicParameters>'] = $Null }
-    }
-
-# Start exporting markdown
-
-    '<!-- markdownlint-disable MD033 -->'
-
-    $Name = if ($Body.Parent.Name) { $Body.Parent.Name } else { $File.BaseName }
-    "# $Name"
-    ''
-    GetMarkDown $Help.Synopsis
-
-    if ($ParameterSets.get_Count()) {
-        ''
-        '## Syntax'
-
-        foreach ($ParameterSet in $ParameterSets.Values) {
-            ''
-            '```PowerShell'
-            $Name
-            foreach ($Key in $ParameterSet.get_Keys()) {
-                $Parameter = $ParameterSet[$Key]
-                $Type, $Default, $Positional, $Optional = $Null
-                if ($ParameterSet[$Key] -is [ParameterAst]) {
-                    $Key       = "-$Key"
-                    $Type       = $Parameter.StaticType.Name
-                    $Default    = $Parameter.DefaultValue
-                    $Positional = $Parameter.Attributes.Position -lt 0
-                    $Optional   = !$Parameter.Attributes.NamedArguments.where{ $_.ArgumentName -eq 'Mandatory' }
-                }
-                if (!$Positional -and !$Optional) { $Key = "[$Key]" }
-                if ($Type -and $Type -ne 'SwitchParameter') { $Key += " <$Type>" }
-                if ($Default) { $Key += " = $Default" }
-                if ($Optional) { $Key = "[$Key]" }
-                $Tab + $Key
-            }
-            '```'
-        }
-    }
-
-    if ($Help.Contains('Description')) {
-        ''
-        '## Description'
-        ''
-        GetMarkDown $Help.Description
-    }
-
-    if ($Help.Contains('Example')) {
-        ''
-        '## Examples'
-
-        for ($i = 0; $i -lt $Help.Example.Count; $i++) {
-            $MarkDown = GetMarkDown $Help.Example[$i]
-            if ($Help.Example[$i].Count -and $Help.Example[$i][0].Text.StartsWith('#')) {
-                ''
-                "### Example $($i + 1): " + $Help.Example[$i][0].Text.SubString(1).Trim()
-                ''
-                GetMarkDown $Help.Example[$i] | Select-Object -Skip 1
+        function GetTypeLink($TypeName) {
+            $Type = $TypeName -as [Type]
+            if ($Type) {
+                $TypeName = $Type.Name
+                $TypeUri = 'https://docs.microsoft.com/en-us/dotnet/api/' + $Type.FullName
+                "<a href=""$TypeUri"">$TypeName</a>"
             }
             else {
-                "### Example $($i + 1):"
-                ''
-                GetMarkDown $Help.Example[$i]
-                ''
+                $TypeName
             }
         }
     }
 
-    if ($Parameters) {
-        ''
-        '## Parameter'
+    process {
+        $File = try { Get-Item $Source } catch { $Null }
+        if (-not $File) { StopError "Cannot find file '$Source'" }
+        $Ast = [Parser]::ParseFile($File.FullName, [ref]$Null, [ref]$Null)
+        $Body =
+            if ($Command) { $Ast.EndBlock.Statements.where{$_.Name -eq $Command}.Body }
+            elseif ($Ast.ParamBlock) { $Ast }
+            else {
+                $Function = $Ast.EndBlock.Statements.where{ $_ -is [FunctionDefinitionAst] }
+                if ($Function.Count -eq 1) { $Function.Body }
+                else { $Ast.EndBlock.Statements.where{ $_.name -is $File.BaseName }.Body }
+            }
+        if (-not $Body) { StopError "Cannot find parameters in '$Source'" }
+        $Help = GetHelp $Body
+        if (-not $Help -and $Body.Parent) { $Help = GetHelp $Ast }
+        if (-not $Help) { StopError "Cannot find comment base help in '$Source'" }
+
+        $Parameters = $Body.ParamBlock.Parameters
+        $ParameterSets = [Ordered]@{}
         $Parameters.foreach{
-            $Name = $_.Name.VariablePath.UserPath
-            $Type = if ($_.StaticType.Name -ne 'SwitchParameter') { " <$($_.StaticType.Name)>" }
-            ''
-            "### <a id=""-$($Name.ToLower())"">**``-$Name$Type``**</a>"
-            if ($Help.Contains('Parameter') -and $Help.Parameter.Contains($Name)) {
-                ""
-                GetMarkDown $Help.Parameter[$Name]
+            $Name =  $_.Name.VariablePath.UserPath
+            $Sets = $_.Attributes.NamedArguments.where{ $_.ArgumentName -eq 'ParameterSetName' }
+            foreach ($Value in @($Sets.Argument.Value)) {
+                $SetName = if ($Value) { "$Value" } else { '__AllParameterSets' }
+                if (!$ParameterSets.Contains($SetName)) { $ParameterSets[$SetName] = [Ordered]@{} }
+                $ParameterSets[$SetName][$Name] = $_
             }
-            ''
-            $Dictionary = [Ordered]@{}
-            $Attributes = $_.Attributes
-            if ($Null -ne $Attributes.MinLength -and $Null -ne $Attributes.MaxLength) { $Dictionary['Accepted length']           = $Attributes.MinLength - $Attributes.MaxLength }
-            elseif ($Null -ne $Attributes.MinLength)                                  { $Dictionary['Minimal length']            = $Attributes.MinLemgth }
-            elseif ($Null -ne $Attributes.MaxLength)                                  { $Dictionary['Maximal lemgth']            = $Attributes.MaxLength }
-            if ($Null -ne $Attributes.RegexPattern)                                   { $Dictionary['Accepted pattern']          = "<code>$($Attributes.RegexPattern)</code>" }
-            if ($Null -ne $Attributes.MinRange -and $Null -ne $Attributes.MaxRange)   { $Dictionary['Accepted range']            =  $Attributes.MinRange - $Attributes.MaxRange }
-            elseif ($Null -ne $Attributes.MinRange)                                   { $Dictionary['Minimal value']             =  $Attributes.MinRange }
-            elseif ($Null -ne $Attributes.MaxRange)                                   { $Dictionary['Maximal value']             =  $Attributes.MaxRange }
-            if ($Null -ne $Attributes.ScriptBlock)                                    { $Dictionary['Accepted script condition'] =  "<code>$($Attributes.ScriptBlock.ToString().Trim() -Split '\s*[\r?\n]\s*' -Join '; ')</code>" }
-            if ($Null -ne $Attributes.ValidValues)                                    { $Dictionary['Accepted values']           =  $Attributes.ValidValues -Join ', ' }
-            $Dictionary['Type'] = GetTypeLink($_.parameterType)
-            $Dictionary['Mandatory'] = [bool]$Attributes.NamedArguments.where{ $_.ArgumentName -eq 'Mandatory' }
-            if ($_.Aliases) { $Dictionary['Aliases'] = $_.Aliases -Join ', ' }
-            $Position = if ($Attributes.Position -ge 0) {$Attributes.Position } else { 'Named' }
-            $Position = if ($Attributes.Position -lt 0) { 'Named' }
-                        elseif ($Attributes.Position -ne $Attributes.Position[0]) { $Attributes.Position -Join ', ' }
-                        else { $Attributes.Position[0] }
-            $Dictionary['Position']                   = $Position
-            $DefaultValue                             = if ($_.DefaultValue) { "<code>$($_.DefaultValue)</code>" } # https://stackoverflow.com/a/64358608/1701026
-            $Dictionary['Default value']              = $DefaultValue
-            $Dictionary['Accept pipeline input']      = $Attributes.ValueFromPipelineByPropertyName
-            $Globbing = ($_.Attributes.where{$_.TypeName.Name -eq 'SupportsWildcards'}).Count -gt 0
-            $Dictionary['Accept wildcard characters'] = $Globbing
-            '<table>'
-            $Dictionary.get_Keys().ForEach{ "<tr><td>$($_):</td><td>$($Dictionary[$_])</td></tr>"}
-            '</table>'
         }
-    }
+        foreach ($SetName in $ParameterSets.get_Keys()) {
+            $ParameterSets[$SetName]['<CommonParameters>'] = $Null
+            if ($Ast.DynamicParamBlock) { $ParameterSets[$SetName]['<DynamicParameters>'] = $Null }
+        }
 
-    if ($Help.Contains('Inputs')) {
-        ''
-        '## Inputs'
-        ''
-        GetMarkDown $Help.Inputs
-    }
+    # Start exporting markdown
 
-    if ($Help.Contains('Outputs')) {
-        ''
-        '## Outputs'
-        ''
-        GetMarkDown $Help.Outputs
-    }
+        '<!-- markdownlint-disable MD033 -->'
 
-    if ($Help.Contains('Link')) {
+        $Name = if ($Body.Parent.Name) { $Body.Parent.Name } else { $File.BaseName }
+        "# $Name"
         ''
-        '## Related Links'
-        ''
-        $LinkRefences = [Collections.Generic.List[String]]::new()
-        ForEach ($Sentence in $Help.Link) {
-            $Text = $Sentence.Text
-            $Link = if ($Text -Match $ReferencePattern) {
-                if ($Matches.Contains('Label')) {
-                    $LinkRefences.Add($Text)
-                    if ($Matches.Contains('Title')) {
-                        if ($Matches['Title']) { "$($Matches['Label']): [$($Matches['Title'])][$($Matches['Label'])]" }
+        GetMarkDown $Help.Synopsis
+
+        if ($ParameterSets.get_Count()) {
+            ''
+            '## Syntax'
+
+            foreach ($ParameterSet in $ParameterSets.Values) {
+                ''
+                '```PowerShell'
+                $Name
+                foreach ($Key in $ParameterSet.get_Keys()) {
+                    $Parameter = $ParameterSet[$Key]
+                    $Type, $Default, $Positional, $Optional = $Null
+                    if ($ParameterSet[$Key] -is [ParameterAst]) {
+                        $Key       = "-$Key"
+                        $Type       = $Parameter.StaticType.Name
+                        $Default    = $Parameter.DefaultValue
+                        $Positional = $Parameter.Attributes.Position -lt 0
+                        $Optional   = !$Parameter.Attributes.NamedArguments.where{ $_.ArgumentName -eq 'Mandatory' }
                     }
-                    else {
-                        "$($Matches['Label']): $($Matches['Uri'])"
-                    }
+                    if (!$Positional -and !$Optional) { $Key = "[$Key]" }
+                    if ($Type -and $Type -ne 'SwitchParameter') { $Key += " <$Type>" }
+                    if ($Default) { $Key += " = $Default" }
+                    if ($Optional) { $Key = "[$Key]" }
+                    $Tab + $Key
                 }
-                elseif ($Matches.Contains('Title')) {
-                    "[$($Matches['Title'])]($($Matches['Uri']))"
-                }
-                else { $Matches['Uri'] }
+                '```'
             }
-            if ($Link) { "* $Link" }
         }
-        if ($LinkRefences) {
+
+        if ($Help.Contains('Description')) {
             ''
-            @($LinkRefences).ForEach{ $_ }
+            '## Description'
+            ''
+            GetMarkDown $Help.Description
         }
+
+        if ($Help.Contains('Example')) {
+            ''
+            '## Examples'
+
+            for ($i = 0; $i -lt $Help.Example.Count; $i++) {
+                $MarkDown = GetMarkDown $Help.Example[$i]
+                if ($Help.Example[$i].Count -and $Help.Example[$i][0].Text.StartsWith('#')) {
+                    ''
+                    "### Example $($i + 1): " + $Help.Example[$i][0].Text.SubString(1).Trim()
+                    ''
+                    GetMarkDown $Help.Example[$i] | Select-Object -Skip 1
+                }
+                else {
+                    "### Example $($i + 1):"
+                    ''
+                    GetMarkDown $Help.Example[$i]
+                    ''
+                }
+            }
+        }
+
+        if ($Parameters) {
+            ''
+            '## Parameter'
+            $Parameters.foreach{
+                $Name = $_.Name.VariablePath.UserPath
+                $Type = if ($_.StaticType.Name -ne 'SwitchParameter') { " <$($_.StaticType.Name)>" }
+                ''
+                "### <a id=""-$($Name.ToLower())"">**``-$Name$Type``**</a>"
+                if ($Help.Contains('Parameter') -and $Help.Parameter.Contains($Name)) {
+                    ""
+                    GetMarkDown $Help.Parameter[$Name]
+                }
+                ''
+                $Dictionary = [Ordered]@{}
+                $Attributes = $_.Attributes
+                if ($Null -ne $Attributes.MinLength -and $Null -ne $Attributes.MaxLength) { $Dictionary['Accepted length']           = $Attributes.MinLength - $Attributes.MaxLength }
+                elseif ($Null -ne $Attributes.MinLength)                                  { $Dictionary['Minimal length']            = $Attributes.MinLemgth }
+                elseif ($Null -ne $Attributes.MaxLength)                                  { $Dictionary['Maximal lemgth']            = $Attributes.MaxLength }
+                if ($Null -ne $Attributes.RegexPattern)                                   { $Dictionary['Accepted pattern']          = "<code>$($Attributes.RegexPattern)</code>" }
+                if ($Null -ne $Attributes.MinRange -and $Null -ne $Attributes.MaxRange)   { $Dictionary['Accepted range']            =  $Attributes.MinRange - $Attributes.MaxRange }
+                elseif ($Null -ne $Attributes.MinRange)                                   { $Dictionary['Minimal value']             =  $Attributes.MinRange }
+                elseif ($Null -ne $Attributes.MaxRange)                                   { $Dictionary['Maximal value']             =  $Attributes.MaxRange }
+                if ($Null -ne $Attributes.ScriptBlock)                                    { $Dictionary['Accepted script condition'] =  "<code>$($Attributes.ScriptBlock.ToString().Trim() -Split '\s*[\r?\n]\s*' -Join '; ')</code>" }
+                if ($Null -ne $Attributes.ValidValues)                                    { $Dictionary['Accepted values']           =  $Attributes.ValidValues -Join ', ' }
+                $Dictionary['Type'] = GetTypeLink($_.parameterType)
+                $Dictionary['Mandatory'] = [bool]$Attributes.NamedArguments.where{ $_.ArgumentName -eq 'Mandatory' }
+                if ($_.Aliases) { $Dictionary['Aliases'] = $_.Aliases -Join ', ' }
+                $Position = if ($Attributes.Position -ge 0) {$Attributes.Position } else { 'Named' }
+                $Position = if ($Attributes.Position -lt 0) { 'Named' }
+                            elseif ($Attributes.Position -ne $Attributes.Position[0]) { $Attributes.Position -Join ', ' }
+                            else { $Attributes.Position[0] }
+                $Dictionary['Position']                   = $Position
+                $DefaultValue                             = if ($_.DefaultValue) { "<code>$($_.DefaultValue)</code>" } # https://stackoverflow.com/a/64358608/1701026
+                $Dictionary['Default value']              = $DefaultValue
+                $Dictionary['Accept pipeline input']      = $Attributes.ValueFromPipelineByPropertyName
+                $Globbing = ($_.Attributes.where{$_.TypeName.Name -eq 'SupportsWildcards'}).Count -gt 0
+                $Dictionary['Accept wildcard characters'] = $Globbing
+                '<table>'
+                $Dictionary.get_Keys().ForEach{ "<tr><td>$($_):</td><td>$($Dictionary[$_])</td></tr>"}
+                '</table>'
+            }
+        }
+
+        if ($Help.Contains('Inputs')) {
+            ''
+            '## Inputs'
+            ''
+            GetMarkDown $Help.Inputs
+        }
+
+        if ($Help.Contains('Outputs')) {
+            ''
+            '## Outputs'
+            ''
+            GetMarkDown $Help.Outputs
+        }
+
+        if ($Help.Contains('Link')) {
+            ''
+            '## Related Links'
+            ''
+            $LinkRefences = [Collections.Generic.List[String]]::new()
+            ForEach ($Sentence in $Help.Link) {
+                $Text = $Sentence.Text
+                $Link = if ($Text -Match $ReferencePattern) {
+                    if ($Matches.Contains('Label')) {
+                        $LinkRefences.Add($Text)
+                        if ($Matches.Contains('Title')) {
+                            if ($Matches['Title']) { "$($Matches['Label']): [$($Matches['Title'])][$($Matches['Label'])]" }
+                        }
+                        else {
+                            "$($Matches['Label']): $($Matches['Uri'])"
+                        }
+                    }
+                    elseif ($Matches.Contains('Title')) {
+                        "[$($Matches['Title'])]($($Matches['Uri']))"
+                    }
+                    else { $Matches['Uri'] }
+                }
+                if ($Link) { "* $Link" }
+            }
+            if ($LinkRefences) {
+                ''
+                @($LinkRefences).ForEach{ $_ }
+            }
+        }
+        ''
+        '[comment]: <> (Created with Get-MarkdownHelp: Install-Script -Name Get-MarkdownHelp)'
     }
-    ''
-    '[comment]: <> (Created with Get-MarkdownHelp: Install-Script -Name Get-MarkdownHelp)'
 }
