@@ -1,12 +1,13 @@
 ## content of .\Create-Docs.ps1 ##
 using namespace System.Management.Automation.Host
-$TmpLocation = $PSScriptRoot
-$Out = $TmpLocation + "\Profile\doc\enUS"
-$In = $TmpLocation + "\Profile\func\"
+#$TmpLocation = $PSScriptRoot
+$TmpLocation = (get-item $PSScriptRoot).parent.FullName
+$Out = $TmpLocation + "\doc\enUS"
+$In = $TmpLocation + "\func\"
 
+Write-Host "TmpLocation: $TmpLocation" -ForegroundColor Green
 Write-Host "In: $In" -ForegroundColor Green
 Write-Host "Out: $Out" -ForegroundColor Green
-
 
 $filter =  "*.ps1"
 $files = Get-ChildItem -path $In -filter $filter
